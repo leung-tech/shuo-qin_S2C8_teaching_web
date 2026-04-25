@@ -8,6 +8,7 @@
     <!-- 載入外部資源 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         /* 基礎設定與護眼背景 */
@@ -54,6 +55,19 @@
         }
         .blank-slot:hover { background-color: #EDF2F7; border-radius: 4px 4px 0 0; }
         .blank-filled { border-bottom: 3px solid #48BB78; color: #2F855A; cursor: default; }
+        
+        /* 翻轉詞語卡 */
+        .vocab-card { cursor: pointer; perspective: 1000px; height: 110px; }
+        .vocab-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s; transform-style: preserve-3d; }
+        .vocab-card.flipped .vocab-inner { transform: rotateY(180deg); }
+        .vocab-front, .vocab-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            display: flex; align-items: center; justify-content: center; 
+            border-radius: 0.75rem; padding: 0.5rem; font-weight: bold; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .vocab-front { background-color: #EBF8FF; color: #2B6CB0; border: 2px solid #90CDF4; }
+        .vocab-back { background-color: #F0FFF4; color: #2F855A; border: 2px solid #9AE6B4; transform: rotateY(180deg); flex-direction: column; }
 
         /* 動畫劇場 */
         .story-container { display: grid; place-items: center; }
@@ -170,24 +184,26 @@
                 <!-- 記敘文 -->
                 <div class="bg-orange-50 border-2 border-orange-300 rounded-2xl p-5 shadow-sm">
                     <h3 class="text-xl font-bold text-orange-700 mb-3 flex items-center border-b-2 border-orange-200 pb-2">
-                        <button onclick="speakText('記敘文。講故事，目的是感動讀者。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                        <button onclick="speakText('記敘文。講故事，目的是感動讀者，分享經歷。重點是時間、地點、人物。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                         <span class="text-2xl mr-2">🎬</span> 記敘文 (講故事)
                     </h3>
                     <ul class="space-y-2 text-orange-900 font-bold">
                         <li>❤ 目的：感動讀者，分享經歷</li>
                         <li>🕒 成分：時間、地點、人物</li>
+                        <li class="text-sm font-normal text-orange-700">例子：兩個和尚去旅行的過程。</li>
                     </ul>
                 </div>
                 <!-- 議論文 -->
                 <div class="bg-blue-50 border-2 border-blue-400 rounded-2xl p-5 shadow-md relative overflow-hidden">
                     <div class="absolute -right-4 -top-4 text-blue-200 text-6xl opacity-30"><i class="fas fa-gavel"></i></div>
                     <h3 class="text-xl font-bold text-blue-800 mb-3 flex items-center border-b-2 border-blue-300 pb-2 relative z-10">
-                        <button onclick="speakText('議論文。講道理，目的是說服讀者。本課就是議論文。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                        <button onclick="speakText('議論文。講道理，目的是說服讀者，證明觀點。本課就是議論文。重點是論點、論據、論證。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                         <span class="text-2xl mr-2">⚖</span> 議論文 (本課重點)
                     </h3>
                     <ul class="space-y-2 text-blue-900 font-bold relative z-10">
                         <li>💭 目的：說服讀者，證明觀點</li>
                         <li>📏 成分：論點、論據、論證</li>
+                        <li class="text-sm font-normal text-blue-700">例子：藉和尚的故事，證明有志者事竟成。</li>
                     </ul>
                 </div>
             </div>
@@ -200,16 +216,16 @@
                 
                 <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
                     <p class="font-bold mb-2 flex items-start">
-                        <button onclick="speakText('第一題：《說勤》是一篇議論文，它的主要目的是什麼？')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
-                        Q1. 《說勤》是一篇議論文，它的「主要目的」是什麼？
+                        <button onclick="speakText('第一題：《說勤》是一篇議論文，它的主要核心目的是什麼？')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                        Q1. 《說勤》是一篇議論文，它的「主要核心目的」是什麼？
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="flex items-stretch gap-2">
-                            <button onclick="speakText('A. 分享經歷感動讀者')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                            <button onclick="speakText('A. 分享作者的個人經歷，感動讀者。')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
                             <button onclick="checkMCQStar(this, false, 'l2q1')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700 text-left">A. 分享經歷感動讀者 😢</button>
                         </div>
                         <div class="flex items-stretch gap-2">
-                            <button onclick="speakText('B. 說服讀者認同觀點')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                            <button onclick="speakText('B. 證明觀點，說服讀者認同。')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
                             <button onclick="checkMCQStar(this, true, 'l2q1')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700 text-left">B. 說服讀者認同觀點 🤔</button>
                         </div>
                     </div>
@@ -246,6 +262,16 @@
                 <button onclick="speakText('第三關：議論文三大要素與實戰。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                 <i class="fas fa-cubes mr-2"></i> L3. 議論文三要素
             </h2>
+
+            <div class="bg-green-50 p-4 rounded-xl border border-green-200 mb-6 shadow-sm">
+                <h3 class="font-bold text-lg text-green-800 mb-2 flex items-center">
+                    <button onclick="speakText('必記口訣：論據是子彈，論證是槍法。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>⚡ 必記口訣
+                </h3>
+                <p class="text-xl font-bold text-gray-800 text-center bg-white py-3 rounded shadow-inner">
+                    「<span class="text-blue-600">論據</span>是子彈 🔫，<span class="text-green-600">論證</span>是槍法 🎯。」
+                </p>
+                <p class="text-sm text-gray-700 mt-2 text-center">有充足的子彈 (論據)，搭配好的槍法 (論證)，才能打中目標 (論點)。</p>
+            </div>
 
             <div class="space-y-4 mb-6">
                 <div class="border-2 border-red-200 bg-red-50 p-4 rounded-xl shadow-sm flex items-center">
@@ -585,7 +611,7 @@
             </div>
         </section>
 
-        <!-- L10: 終極產出 (3星) -->
+        <!-- L10: 終極產出 (3星) - 無語音轉文字版 -->
         <section id="level-10" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-indigo-500 scroll-mt-24 mb-20">
             <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-indigo-700">
                 <button onclick="speakText('第十關：終極產出。請填寫資料並分開回答三條問題，然後提交功課！')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
@@ -603,7 +629,7 @@
                 </div>
 
                 <p class="font-bold text-indigo-800 mb-3 flex items-start">
-                    <button onclick="speakText('綜合思考題。請分開三題作答。你可以點擊提示按鈕，或者點擊旁邊的麥克風用語音作答。')" class="tts-btn-icon text-sm mt-1"><i class="fas fa-volume-up"></i></button>
+                    <button onclick="speakText('綜合思考題。請分開三題作答。你可以點擊提示按鈕，或者自行打字作答。')" class="tts-btn-icon text-sm mt-1"><i class="fas fa-volume-up"></i></button>
                     <span>🤔 綜合思考題：請分開作答 (共 3 星)</span>
                 </p>
                 
@@ -617,12 +643,8 @@
                         <div class="flex flex-wrap gap-2 mb-2">
                             <button onclick="addWordTo('任何成就的取得，都是與勤奮分不開的。', 'q1-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 提示 🎯</button>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="w-full">
                             <textarea id="q1-area" class="w-full h-16 p-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-400 text-sm shadow-inner" placeholder="請在此作答第一題..."></textarea>
-                            <button onclick="toggleSpeechFor('q1-area', 'q1-mic')" id="q1-mic" class="bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 flex flex-col items-center justify-center w-16 sm:w-20 flex-shrink-0 transition">
-                                <i class="fas fa-microphone text-lg sm:text-xl mb-1"></i>
-                                <span class="text-[10px] sm:text-xs font-bold">錄音</span>
-                            </button>
                         </div>
                     </div>
 
@@ -636,12 +658,8 @@
                             <button onclick="addWordTo('在「溫習功課」上最需要勤奮。', 'q2-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 學業 📚</button>
                             <button onclick="addWordTo('在「發展興趣/運動」上最需要勤奮。', 'q2-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 興趣 🏀</button>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="w-full">
                             <textarea id="q2-area" class="w-full h-16 p-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-400 text-sm shadow-inner" placeholder="請在此作答第二題..."></textarea>
-                            <button onclick="toggleSpeechFor('q2-area', 'q2-mic')" id="q2-mic" class="bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 flex flex-col items-center justify-center w-16 sm:w-20 flex-shrink-0 transition">
-                                <i class="fas fa-microphone text-lg sm:text-xl mb-1"></i>
-                                <span class="text-[10px] sm:text-xs font-bold">錄音</span>
-                            </button>
                         </div>
                     </div>
 
@@ -656,12 +674,8 @@
                             <button onclick="addWordTo('還需要「找到合適的方法」。', 'q3-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 方法 📖</button>
                             <button onclick="addWordTo('還要懂得管束自己、意志堅定。', 'q3-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 意志 💪</button>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="w-full">
                             <textarea id="q3-area" class="w-full h-16 p-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-400 text-sm shadow-inner" placeholder="請在此作答第三題..."></textarea>
-                            <button onclick="toggleSpeechFor('q3-area', 'q3-mic')" id="q3-mic" class="bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 flex flex-col items-center justify-center w-16 sm:w-20 flex-shrink-0 transition">
-                                <i class="fas fa-microphone text-lg sm:text-xl mb-1"></i>
-                                <span class="text-[10px] sm:text-xs font-bold">錄音</span>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -932,72 +946,13 @@
             });
         }
 
-        // L10: 語音轉文字與提交
+        // L10: 填寫並提交
         function addWordTo(word, targetId) {
             const area = document.getElementById(targetId);
             if(area) {
                 area.value += (area.value.length > 0 && !area.value.endsWith('，') && !area.value.endsWith('。') ? '，' : '') + word;
             }
             speakText(word);
-        }
-
-        let recognition = null;
-        let isDictating = false;
-        let currentTargetId = null;
-        let currentMicBtnId = null;
-
-        function initSpeechRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert("很抱歉，你的設備暫不支援語音轉文字，請打字喔！");
-                return false;
-            }
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = false; 
-            recognition.interimResults = false; 
-            recognition.lang = 'zh-HK';
-
-            recognition.onstart = function() {
-                isDictating = true;
-                const btn = document.getElementById(currentMicBtnId);
-                if(btn) {
-                    btn.innerHTML = '<i class="fas fa-stop-circle text-red-200 animate-pulse text-lg sm:text-xl mb-1"></i><span class="text-[10px] sm:text-xs font-bold text-white">停止</span>';
-                    btn.classList.replace('bg-blue-500', 'bg-red-600');
-                    btn.classList.replace('hover:bg-blue-600', 'hover:bg-red-700');
-                }
-            };
-            recognition.onresult = function(event) {
-                const transcript = event.results[0][0].transcript;
-                const area = document.getElementById(currentTargetId);
-                if(area) area.value += (area.value.length > 0 && !area.value.endsWith('，') && !area.value.endsWith('。') ? '，' : '') + transcript + '。';
-            };
-            recognition.onerror = function(event) { stopDictation(); };
-            recognition.onend = function() { stopDictation(); };
-            return true;
-        }
-
-        function toggleSpeechFor(targetId, micBtnId) {
-            if (isDictating && currentMicBtnId === micBtnId) {
-                recognition.stop(); return;
-            }
-            if (isDictating) stopDictation();
-            
-            currentTargetId = targetId;
-            currentMicBtnId = micBtnId;
-
-            if (!recognition) { if(!initSpeechRecognition()) return; }
-            try { recognition.start(); } catch(e) {}
-        }
-        
-        function stopDictation() {
-            isDictating = false;
-            const btn = document.getElementById(currentMicBtnId);
-            if(btn) {
-                btn.innerHTML = '<i class="fas fa-microphone text-lg sm:text-xl mb-1"></i><span class="text-[10px] sm:text-xs font-bold">錄音</span>';
-                btn.classList.replace('bg-red-600', 'bg-blue-500');
-                btn.classList.replace('hover:bg-red-700', 'hover:bg-blue-600');
-            }
-            currentTargetId = null; currentMicBtnId = null;
         }
 
         function submitHomework() {

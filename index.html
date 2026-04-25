@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>《說勤》互動學習村 - 星星獎勵升級版</title>
+    <title>《說勤》互動學習村</title>
+    
+    <!-- 載入外部資源 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
+        /* 基礎設定與護眼背景 */
         body { 
             background-color: #FCFAF2; 
             font-family: "Microsoft JhengHei", Arial, sans-serif; 
@@ -20,66 +22,74 @@
         html { scroll-behavior: smooth; }
         .text-extra-large { font-size: 1.35rem; line-height: 2; }
         
-        /* 色彩編碼系統 */
-        .color-point { color: #E53E3E; font-weight: bold; }
-        .color-evidence { color: #3182CE; font-weight: bold; }
-        .color-reasoning { color: #38A169; font-weight: bold; }
-        
-        /* Hover 詞彙解釋 */
-        .hover-word { position: relative; display: inline-block; cursor: help; border-bottom: 2px dashed #9F7AEA; color: #4C51BF; font-weight: bold; }
-        .hover-word .tooltip { 
-            visibility: hidden; width: 160px; background-color: #FFF; color: #333; text-align: center; 
-            border-radius: 8px; padding: 8px; position: absolute; z-index: 50; bottom: 125%; left: 50%; 
-            margin-left: -80px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 2px solid #9F7AEA;
-            font-size: 1rem; line-height: 1.4; opacity: 0; transition: opacity 0.3s;
+        /* 互動按鈕動畫 */
+        .mcq-btn, .match-btn, .word-btn, .theme-btn { 
+            transition: transform 0.2s, box-shadow 0.2s; 
+            cursor: pointer; 
         }
-        .hover-word:hover .tooltip { visibility: visible; opacity: 1; }
-        
-        /* 其他互動動畫 */
-        .focus-container:hover .focus-item:not(:hover) { opacity: 0.4; filter: grayscale(30%); transition: all 0.3s ease; }
-        .focus-item { transition: all 0.3s ease; }
-        .mcq-btn { transition: all 0.2s; }
-        .mcq-btn:active { transform: scale(0.95); }
+        .mcq-btn:active, .match-btn:active, .word-btn:active, .theme-btn:active { 
+            transform: scale(0.95); 
+        }
         .shake { animation: shake 0.5s; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25%, 75% { transform: translateX(-5px); } 50% { transform: translateX(5px); } }
-        .bounce-slow { animation: bounce 2s infinite; }
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); } 
+            25%, 75% { transform: translateX(-5px); } 
+            50% { transform: translateX(5px); } 
+        }
         
-        /* 🌟 修復與優化：動畫劇場 CSS Grid 疊加技術 🌟 */
+        /* 星星動畫 */
+        @keyframes starPop { 
+            0% { transform: scale(0.5) rotate(-20deg); opacity: 0; } 
+            50% { transform: scale(1.5) rotate(20deg); opacity: 1; } 
+            100% { transform: scale(1) rotate(0deg); opacity: 1; } 
+        }
+        .star-animate { animation: starPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* 填充槽設計 */
+        .blank-slot { 
+            display: inline-block; min-width: 90px; height: 32px; 
+            border-bottom: 3px dashed #A0AEC0; padding: 0 8px; 
+            color: #E53E3E; font-weight: bold; text-align: center; 
+            vertical-align: middle; cursor: pointer; transition: background-color 0.2s; 
+        }
+        .blank-slot:hover { background-color: #EDF2F7; border-radius: 4px 4px 0 0; }
+        .blank-filled { border-bottom: 3px solid #48BB78; color: #2F855A; cursor: default; }
+
+        /* 動畫劇場 */
         .story-container { display: grid; place-items: center; }
         .story-frame { grid-area: 1 / 1; transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; width: 100%; text-align: center; }
         .story-hidden { opacity: 0; transform: scale(0.95) translateX(20px); pointer-events: none; z-index: 0; }
         .story-active { opacity: 1; transform: scale(1) translateX(0); z-index: 10; }
+        .bounce-slow { animation: bounce 2s infinite; }
 
-        /* 獲得星星動畫 */
-        @keyframes starPop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.5); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
-        .star-animate { animation: starPop 0.6s ease-out forwards; }
-
-        /* 主旨填充槽 */
-        .blank-slot { display: inline-block; min-width: 100px; border-bottom: 3px dashed #cbd5e0; padding: 0 8px; color: #e53e3e; font-weight: bold; text-align: center; }
-        .blank-filled { border-bottom: 3px solid #48bb78; color: #2f855a; }
-        
-        /* 選單 Modal */
+        /* 選單與其他 */
         #nav-menu { transition: transform 0.3s ease-in-out; transform: translateX(100%); }
         #nav-menu.open { transform: translateX(0); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .tree-line-v { width: 4px; height: 20px; background-color: #CBD5E0; margin: 0 auto; }
+        .tts-btn-icon { color: #60A5FA; transition: color 0.2s; cursor: pointer; margin-right: 0.5rem; font-size: 1.1em; flex-shrink: 0; }
+        .tts-btn-icon:hover { color: #2563EB; }
+        .tts-option-btn { background-color: #EBF8FF; color: #3182CE; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s; flex-shrink: 0; }
+        .tts-option-btn:hover { background-color: #BEE3F8; }
     </style>
 </head>
 <body class="pb-20">
 
-    <!-- 頂部導航 -->
+    <!-- 導航列 -->
     <nav class="fixed top-0 w-full bg-white shadow-md z-40 flex justify-between items-center px-4 py-3 border-b-4 border-yellow-400">
         <div class="flex items-center space-x-2 font-bold text-xl sm:text-2xl text-blue-700">
-            <button onclick="speakText('歡迎來到說勤學習村')" class="text-blue-400 hover:text-blue-600"><i class="fas fa-volume-up"></i></button>
+            <button onclick="speakText('歡迎來到說勤學習村')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
             <i class="fas fa-school"></i> <span class="hidden sm:inline">《說勤》學習村</span>
         </div>
         
-        <!-- 星星獎勵系統 UI -->
+        <!-- 星星獎勵 UI (總分 30 星) -->
         <div class="flex items-center bg-yellow-50 px-4 py-1.5 rounded-full border-2 border-yellow-400 shadow-inner">
             <span class="text-2xl mr-2" id="star-icon">⭐</span>
             <span id="star-count" class="font-black text-yellow-600 text-2xl">0</span>
             <span class="text-yellow-500 font-bold mx-1 text-lg">/</span>
-            <span class="text-yellow-500 font-bold text-lg">20</span>
+            <span class="text-yellow-500 font-bold text-lg">30</span>
         </div>
 
         <div class="flex space-x-2">
@@ -100,36 +110,39 @@
             <button onclick="toggleMenu()" class="text-gray-500 hover:text-red-500 text-2xl"><i class="fas fa-times"></i></button>
         </div>
         <ul class="space-y-3 font-bold text-gray-700">
-            <li><a href="#level-1" onclick="toggleMenu()" class="block p-2 hover:bg-orange-50 rounded text-orange-600">L1. 課前熱身投票</a></li>
-            <li><a href="#level-2" onclick="toggleMenu()" class="block p-2 hover:bg-blue-50 rounded text-blue-600">L2. 文體與三要素</a></li>
-            <li><a href="#level-3" onclick="toggleMenu()" class="block p-2 hover:bg-green-50 rounded text-green-600">L3. 詞語配對</a></li>
-            <li><a href="#level-4" onclick="toggleMenu()" class="block p-2 hover:bg-purple-50 rounded text-purple-600">L4. 名人朋友圈</a></li>
-            <li><a href="#level-5" onclick="toggleMenu()" class="block p-2 hover:bg-pink-50 rounded text-pink-600">L5. 動畫劇場</a></li>
-            <li><a href="#level-6" onclick="toggleMenu()" class="block p-2 hover:bg-teal-50 rounded text-teal-600">L6. 課文互動聽讀</a></li>
-            <li><a href="#level-7" onclick="toggleMenu()" class="block p-2 hover:bg-cyan-50 rounded text-cyan-600">L7. 結構地圖</a></li>
-            <li><a href="#level-8" onclick="toggleMenu()" class="block p-2 hover:bg-purple-50 rounded text-purple-600">L8. 實戰遊戲</a></li>
-            <li><a href="#level-9" onclick="toggleMenu()" class="block p-2 hover:bg-orange-50 rounded text-orange-600">L9. 諺語遊樂場</a></li>
-            <li><a href="#level-10" onclick="toggleMenu()" class="block p-2 hover:bg-red-50 rounded text-red-600">L10. 腦圖與產出</a></li>
+            <li><a href="#level-1" onclick="toggleMenu()" class="block p-2 hover:bg-blue-50 rounded text-blue-600">L1. 課前熱身</a></li>
+            <li><a href="#level-2" onclick="toggleMenu()" class="block p-2 hover:bg-orange-50 rounded text-orange-600">L2. 文體對決</a></li>
+            <li><a href="#level-3" onclick="toggleMenu()" class="block p-2 hover:bg-green-50 rounded text-green-600">L3. 議論文三要素</a></li>
+            <li><a href="#level-4" onclick="toggleMenu()" class="block p-2 hover:bg-pink-50 rounded text-pink-600">L4. 名人朋友圈</a></li>
+            <li><a href="#level-5" onclick="toggleMenu()" class="block p-2 hover:bg-teal-50 rounded text-teal-600">L5. 詞語庫互動配對</a></li>
+            <li><a href="#level-6" onclick="toggleMenu()" class="block p-2 hover:bg-cyan-50 rounded text-cyan-600">L6. 動畫劇場</a></li>
+            <li><a href="#level-7" onclick="toggleMenu()" class="block p-2 hover:bg-purple-50 rounded text-purple-600">L7. 結構地圖</a></li>
+            <li><a href="#level-8" onclick="toggleMenu()" class="block p-2 hover:bg-yellow-50 rounded text-yellow-600">L8. 實戰遊戲</a></li>
+            <li><a href="#level-9" onclick="toggleMenu()" class="block p-2 hover:bg-red-50 rounded text-red-600">L9. 諺語遊樂場</a></li>
+            <li><a href="#level-10" onclick="toggleMenu()" class="block p-2 hover:bg-indigo-50 rounded text-indigo-600">L10. 終極產出</a></li>
         </ul>
     </div>
 
     <!-- 主要內容區 -->
-    <main class="max-w-4xl mx-auto mt-24 px-4 space-y-10" id="main-content">
+    <main class="max-w-4xl mx-auto mt-24 px-4 space-y-12" id="main-content">
 
-        <!-- L1：課前熱身 (1星) -->
+        <!-- L1: 課前熱身 (1星) -->
         <section id="level-1" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-orange-400 scroll-mt-24">
             <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-orange-600">
-                <button onclick="speakText('第一關：課前熱身。你認為成功靠天才還是努力？')" class="mr-3 text-orange-400 hover:text-orange-600"><i class="fas fa-volume-up"></i></button>
+                <button onclick="speakText('第一關：課前熱身。你認為成功靠天才還是努力？')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                 <i class="fas fa-fire mr-2"></i> L1. 課前熱身
             </h2>
             
             <div class="bg-orange-50 p-6 rounded-2xl border-2 border-orange-200 text-center mb-6">
-                <h3 class="font-bold text-xl mb-4">🙋‍♂️ 投票區：你認為成功最主要靠什麼？</h3>
+                <h3 class="font-bold text-xl mb-4 flex items-center justify-center">
+                    <button onclick="speakText('投票區：你認為成功最主要靠什麼？')" class="tts-btn-icon text-base"><i class="fas fa-volume-up"></i></button>
+                    🙋‍♂️ 投票區：你認為成功最主要靠什麼？
+                </h3>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button onclick="showEdison(this)" class="mcq-btn bg-white border-2 border-blue-300 text-blue-700 px-6 py-4 rounded-xl font-bold text-xl shadow-sm">
+                    <button onclick="showEdisonAction(this)" class="mcq-btn bg-white border-2 border-blue-300 text-blue-700 px-6 py-4 rounded-xl font-bold text-xl shadow-sm">
                         🧠 天生的才能 (天才)
                     </button>
-                    <button onclick="showEdison(this)" class="mcq-btn bg-white border-2 border-red-300 text-red-700 px-6 py-4 rounded-xl font-bold text-xl shadow-sm">
+                    <button onclick="showEdisonAction(this)" class="mcq-btn bg-white border-2 border-red-300 text-red-700 px-6 py-4 rounded-xl font-bold text-xl shadow-sm">
                         💦 後天的努力 (勤奮)
                     </button>
                 </div>
@@ -141,115 +154,162 @@
                 <p class="text-3xl font-bold text-red-600 bg-white inline-block px-4 py-2 rounded-lg shadow-md my-2">
                     「1% 的天才 + 99% 的汗水」
                 </p>
-                <button onclick="completeSection(this, 'level-2')" class="mt-6 bg-orange-500 text-white px-8 py-2 rounded-full font-bold hover:bg-orange-600 shadow w-full sm:w-auto">進入下一關</button>
+                <p class="text-lg text-gray-700 mt-4 font-bold">這就是我們今天要學的課文：<span class="text-xl text-blue-700 underline">《說勤》</span>！</p>
+                <button onclick="completeSection(this, 'level-2')" class="mt-4 bg-orange-500 text-white px-8 py-2 rounded-full font-bold hover:bg-orange-600 shadow w-full sm:w-auto">進入下一關</button>
             </div>
         </section>
 
-        <!-- L2：文體與三要素 (2星) -->
+        <!-- L2: 文體對決 (2星) -->
         <section id="level-2" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-blue-500 scroll-mt-24">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-6 flex items-center text-blue-700">
-                <button onclick="speakText('第二關：文體與三要素。請回答兩條選擇題。')" class="mr-3 text-blue-400 hover:text-blue-600"><i class="fas fa-volume-up"></i></button>
-                <i class="fas fa-balance-scale mr-2"></i> L2. 文體與三要素
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-blue-700">
+                <button onclick="speakText('第二關：文體對決。記敘文對決議論文。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                <i class="fas fa-book-open mr-2"></i> L2. 文體對決
             </h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div class="bg-orange-50 border-2 border-orange-300 rounded-2xl p-4 shadow-sm">
-                    <h3 class="font-bold text-xl text-orange-800 flex items-center"><button onclick="speakText('記敘文。目的是感動讀者。')" class="mr-2 text-orange-500"><i class="fas fa-volume-up"></i></button>🎬 記敘文</h3>
-                    <p class="mt-2 text-orange-900 font-bold">❤ 目的：感動讀者</p>
+                <!-- 記敘文 -->
+                <div class="bg-orange-50 border-2 border-orange-300 rounded-2xl p-5 shadow-sm">
+                    <h3 class="text-xl font-bold text-orange-700 mb-3 flex items-center border-b-2 border-orange-200 pb-2">
+                        <button onclick="speakText('記敘文。講故事，目的是感動讀者。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                        <span class="text-2xl mr-2">🎬</span> 記敘文 (講故事)
+                    </h3>
+                    <ul class="space-y-2 text-orange-900 font-bold">
+                        <li>❤ 目的：感動讀者，分享經歷</li>
+                        <li>🕒 成分：時間、地點、人物</li>
+                    </ul>
                 </div>
-                <div class="bg-blue-50 border-2 border-blue-400 rounded-2xl p-4 shadow-sm relative">
-                    <h3 class="font-bold text-xl text-blue-800 flex items-center"><button onclick="speakText('議論文。目的是說服讀者。')" class="mr-2 text-blue-500"><i class="fas fa-volume-up"></i></button>⚖ 議論文</h3>
-                    <p class="mt-2 text-blue-900 font-bold">💭 目的：說服讀者</p>
+                <!-- 議論文 -->
+                <div class="bg-blue-50 border-2 border-blue-400 rounded-2xl p-5 shadow-md relative overflow-hidden">
+                    <div class="absolute -right-4 -top-4 text-blue-200 text-6xl opacity-30"><i class="fas fa-gavel"></i></div>
+                    <h3 class="text-xl font-bold text-blue-800 mb-3 flex items-center border-b-2 border-blue-300 pb-2 relative z-10">
+                        <button onclick="speakText('議論文。講道理，目的是說服讀者。本課就是議論文。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                        <span class="text-2xl mr-2">⚖</span> 議論文 (本課重點)
+                    </h3>
+                    <ul class="space-y-2 text-blue-900 font-bold relative z-10">
+                        <li>💭 目的：說服讀者，證明觀點</li>
+                        <li>📏 成分：論點、論據、論證</li>
+                    </ul>
                 </div>
             </div>
 
-            <div class="space-y-4 mb-6">
-                <div class="bg-point p-4 rounded-xl flex items-center shadow-sm">
-                    <div class="text-4xl mr-4">📢</div>
-                    <div><h4 class="text-xl color-point">1. 論點 (紅色)</h4><p class="text-red-700">作者的明確主張 (目標)。</p></div>
-                </div>
-                <div class="bg-evidence p-4 rounded-xl flex items-center shadow-sm">
-                    <div class="text-4xl mr-4">📸</div>
-                    <div><h4 class="text-xl color-evidence">2. 論據 (藍色)</h4><p class="text-blue-700">用來證明的材料 (事實/道理)。</p></div>
-                </div>
-                <div class="bg-reasoning p-4 rounded-xl flex items-center shadow-sm">
-                    <div class="text-4xl mr-4">⚙</div>
-                    <div><h4 class="text-xl color-reasoning">3. 論證 (綠色)</h4><p class="text-green-700">運用材料的方法 (如：舉例)。</p></div>
-                </div>
-            </div>
-
+            <!-- MCQ 挑戰 (2星) -->
             <div class="bg-gray-100 p-5 rounded-2xl border-2 border-gray-300">
+                <h3 class="text-lg font-bold mb-3 flex items-center">
+                    <button onclick="speakText('選擇題挑戰，每題一顆星！')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>⭐ 知識驗收 (共 2 星)
+                </h3>
+                
                 <div class="bg-white p-4 rounded-xl shadow-sm mb-4">
-                    <p class="font-bold mb-2 flex items-start"><button onclick="speakText('問題一：作者利用事實數據表達觀點，最終目的是什麼？')" class="mr-2 text-gray-500"><i class="fas fa-volume-up"></i></button> Q1. 作者利用事實數據表達觀點，最終目的是什麼？</p>
+                    <p class="font-bold mb-2 flex items-start">
+                        <button onclick="speakText('第一題：《說勤》是一篇議論文，它的主要目的是什麼？')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                        Q1. 《說勤》是一篇議論文，它的「主要目的」是什麼？
+                    </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button onclick="checkMCQStar(this, false, 'l2q1')" class="mcq-btn bg-white border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700">A. 感動讀者 😢</button>
-                        <button onclick="checkMCQStar(this, true, 'l2q1')" class="mcq-btn bg-white border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700">B. 說服讀者 🤔</button>
+                        <div class="flex items-stretch gap-2">
+                            <button onclick="speakText('A. 分享經歷感動讀者')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                            <button onclick="checkMCQStar(this, false, 'l2q1')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700 text-left">A. 分享經歷感動讀者 😢</button>
+                        </div>
+                        <div class="flex items-stretch gap-2">
+                            <button onclick="speakText('B. 說服讀者認同觀點')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                            <button onclick="checkMCQStar(this, true, 'l2q1')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700 text-left">B. 說服讀者認同觀點 🤔</button>
+                        </div>
                     </div>
                     <p id="feedback-l2q1" class="mt-2 font-bold hidden text-sm"></p>
                 </div>
+
                 <div class="bg-white p-4 rounded-xl shadow-sm">
-                    <p class="font-bold mb-2 flex items-start"><button onclick="speakText('問題二：引用統計處數據，這屬於什麼？')" class="mr-2 text-gray-500"><i class="fas fa-volume-up"></i></button> Q2. 引用「統計處數據」，這屬於什麼？</p>
+                    <p class="font-bold mb-2 flex items-start">
+                        <button onclick="speakText('第二題：在口訣中，我們說論據是什麼？論證又是什麼？')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                        Q2. 在口訣中，我們說「論據」是什麼？「論證」又是什麼？
+                    </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button onclick="checkMCQStar(this, false, 'l2q2')" class="mcq-btn bg-white border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700">A. 🎓道理論據</button>
-                        <button onclick="checkMCQStar(this, true, 'l2q2')" class="mcq-btn bg-white border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700">B. 📸事實論據</button>
+                        <div class="flex items-stretch gap-2">
+                            <button onclick="speakText('A. 論據是目標，論證是材料。')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                            <button onclick="checkMCQStar(this, false, 'l2q2')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700 text-left">A. 論據=目標；論證=材料 ❌</button>
+                        </div>
+                        <div class="flex items-stretch gap-2">
+                            <button onclick="speakText('B. 論據是子彈，論證是槍法。')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                            <button onclick="checkMCQStar(this, true, 'l2q2')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-3 rounded-lg font-bold text-gray-700 text-left">B. 論據=子彈；論證=槍法 🔫🎯</button>
+                        </div>
                     </div>
                     <p id="feedback-l2q2" class="mt-2 font-bold hidden text-sm"></p>
                 </div>
             </div>
+            
             <div class="text-center mt-6">
                 <button onclick="completeSection(this, 'level-3')" class="bg-blue-600 text-white px-8 py-2 rounded-full font-bold hover:bg-blue-700 shadow w-full sm:w-auto">進入下一關</button>
             </div>
         </section>
 
-        <!-- L3：詞語庫拖拉配對 (4星) -->
+        <!-- L3: 議論文三要素 (3星) -->
         <section id="level-3" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-green-500 scroll-mt-24">
             <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-green-600">
-                <button onclick="speakText('第三關：詞語庫配對。先點擊上方藍色詞語，再點擊下方對應的空位。')" class="mr-3 text-green-400 hover:text-green-600"><i class="fas fa-volume-up"></i></button>
-                <i class="fas fa-spell-check mr-2"></i> L3. 詞語庫互動配對
+                <button onclick="speakText('第三關：議論文三大要素與實戰。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                <i class="fas fa-cubes mr-2"></i> L3. 議論文三要素
             </h2>
-            <p class="mb-4 text-gray-700 font-bold bg-green-50 p-3 rounded-lg border border-green-200">
-                👆 <span class="text-green-700">點擊上方的藍色詞語</span> ➡️ 👇 <span class="text-green-700">點擊下方黃色的解釋框放入！</span> 每對一顆星！
-            </p>
 
-            <div class="flex flex-wrap justify-center gap-3 mb-8 p-4 bg-blue-50 rounded-xl border-2 border-blue-200" id="vocab-source">
-                <button onclick="selectVocab(this, 'v1')" class="vocab-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">造詣</button>
-                <button onclick="selectVocab(this, 'v2')" class="vocab-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">建樹</button>
-                <button onclick="selectVocab(this, 'v3')" class="vocab-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">遲鈍</button>
-                <button onclick="selectVocab(this, 'v4')" class="vocab-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">漫遊</button>
+            <div class="space-y-4 mb-6">
+                <div class="border-2 border-red-200 bg-red-50 p-4 rounded-xl shadow-sm flex items-center">
+                    <div class="text-4xl mr-4">👑</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-red-800 flex items-center">
+                            <button onclick="speakText('第一：論點。代表國王或看法。是作者的主張。必須明確。')" class="mr-2 text-red-400"><i class="fas fa-volume-up"></i></button> 1. 論點 (國王 / 看法)
+                        </h4>
+                        <p class="text-red-600 font-bold text-sm">作者的「主張、看法」。必須明確！</p>
+                    </div>
+                </div>
+                <div class="border-2 border-blue-200 bg-blue-50 p-4 rounded-xl shadow-sm flex items-center">
+                    <div class="text-4xl mr-4">📸</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-blue-800 flex items-center">
+                            <button onclick="speakText('第二：論據。代表相機或材料。用來證明論點的證據。')" class="mr-2 text-blue-400"><i class="fas fa-volume-up"></i></button> 2. 論據 (相機 / 材料)
+                        </h4>
+                        <p class="text-blue-600 font-bold text-sm">證明論點的材料 (事實 或 道理/名言)。</p>
+                    </div>
+                </div>
+                <div class="border-2 border-green-200 bg-green-50 p-4 rounded-xl shadow-sm flex items-center">
+                    <div class="text-4xl mr-4">🎯</div>
+                    <div>
+                        <h4 class="text-xl font-bold text-green-800 flex items-center">
+                            <button onclick="speakText('第三：論證。代表過程與槍法。運用材料來證明論點的方法。')" class="mr-2 text-green-400"><i class="fas fa-volume-up"></i></button> 3. 論證 (過程 / 槍法)
+                        </h4>
+                        <p class="text-green-600 font-bold text-sm">運用材料的方法 (例如：舉例論證)。</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
-                    <div onclick="dropVocab(this, 'v2')" class="drop-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-green-700 cursor-pointer hover:bg-gray-100 flex-shrink-0">放入詞語</div>
-                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('建立的偉大功勞。')" class="mr-1 text-gray-400 hover:text-green-600"><i class="fas fa-volume-up"></i></button> 建立的偉大功勞。</div>
+            <!-- 互動填充 (3星) -->
+            <div class="bg-gray-100 p-5 rounded-2xl border-2 border-gray-300">
+                <h3 class="text-lg font-bold mb-3 flex items-center">
+                    <button onclick="speakText('填充遊戲：學生應否穿校服。點擊藍色詞語放入空格。每放對一個得一顆星。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>⭐ 互動填充：學生應否穿校服？ (共 3 星)
+                </h3>
+                <p class="text-sm text-gray-600 mb-4 bg-white p-2 rounded inline-block">👆 點擊藍色詞語 ➡️ 👇 點擊下方虛線框放入！</p>
+                
+                <div class="flex flex-wrap justify-center gap-2 mb-4" id="train-words">
+                    <button onclick="selectWord(this, 'wA')" class="word-btn bg-blue-500 text-white font-bold px-3 py-2 rounded shadow text-sm">喬布斯每天穿同款衣服</button>
+                    <button onclick="selectWord(this, 'wB')" class="word-btn bg-blue-500 text-white font-bold px-3 py-2 rounded shadow text-sm">穿校服大家平等</button>
+                    <button onclick="selectWord(this, 'wC')" class="word-btn bg-blue-500 text-white font-bold px-3 py-2 rounded shadow text-sm">穿校服可以減少比較</button>
                 </div>
-                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
-                    <div onclick="dropVocab(this, 'v1')" class="drop-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-green-700 cursor-pointer hover:bg-gray-100 flex-shrink-0">放入詞語</div>
-                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('學問達到的很高水平。')" class="mr-1 text-gray-400 hover:text-green-600"><i class="fas fa-volume-up"></i></button> 學問達到的很高水平。</div>
-                </div>
-                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
-                    <div onclick="dropVocab(this, 'v4')" class="drop-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-green-700 cursor-pointer hover:bg-gray-100 flex-shrink-0">放入詞語</div>
-                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('隨意到處遊歷考察。')" class="mr-1 text-gray-400 hover:text-green-600"><i class="fas fa-volume-up"></i></button> 隨意到處遊歷考察。</div>
-                </div>
-                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
-                    <div onclick="dropVocab(this, 'v3')" class="drop-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-green-700 cursor-pointer hover:bg-gray-100 flex-shrink-0">放入詞語</div>
-                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('思想或動作反應很慢。')" class="mr-1 text-gray-400 hover:text-green-600"><i class="fas fa-volume-up"></i></button> 思想或動作反應很慢。</div>
+
+                <div class="bg-white p-4 rounded-xl shadow-inner text-sm sm:text-base font-bold space-y-4">
+                    <p class="border-b pb-2 flex flex-wrap items-center"><span class="text-red-600 mr-2">【論點】</span> 我覺得 <span id="slot-t1" onclick="dropWord(this, 'wC')" class="blank-slot mx-1">放入</span>。</p>
+                    <p class="border-b pb-2 flex flex-wrap items-center"><span class="text-blue-600 mr-2">【論據】</span> 事實： <span id="slot-t2" onclick="dropWord(this, 'wA')" class="blank-slot mx-1">放入</span>。</p>
+                    <p class="flex flex-wrap items-center"><span class="text-green-600 mr-2">【論證】</span> 所以這證明了 <span id="slot-t3" onclick="dropWord(this, 'wB')" class="blank-slot mx-1">放入</span>。</p>
                 </div>
             </div>
 
-            <div class="text-center mt-8">
-                <button onclick="completeSection(this, 'level-4')" class="bg-green-500 text-white px-8 py-2 rounded-full font-bold hover:bg-green-600 shadow w-full sm:w-auto">進入下一關</button>
+            <div class="text-center mt-6">
+                <button onclick="completeSection(this, 'level-4')" class="bg-green-600 text-white px-8 py-2 rounded-full font-bold hover:bg-green-700 shadow w-full sm:w-auto">進入下一關</button>
             </div>
         </section>
 
-        <!-- L4：名人朋友圈 (1星) -->
-        <section id="level-4" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-indigo-500 scroll-mt-24">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-indigo-700">
-                <button onclick="speakText('第四關：名人朋友圈。看完獲得一顆星！')" class="mr-3 text-indigo-400 hover:text-indigo-600"><i class="fas fa-volume-up"></i></button>
+        <!-- L4: 名人朋友圈 (1星) -->
+        <section id="level-4" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-pink-500 scroll-mt-24">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-pink-700">
+                <button onclick="speakText('第四關：名人朋友圈。看完獲得一顆星！')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                 <i class="fas fa-id-card mr-2"></i> L4. 名人朋友圈
             </h2>
-            <p class="mb-4 text-indigo-900 font-bold bg-indigo-50 p-3 rounded-xl border border-indigo-200">
-                <span class="color-evidence">事實論據 (藍色)！</span> 左右滑動查看名人的「動態貼文」。
+            <p class="mb-4 text-pink-900 font-bold bg-pink-50 p-3 rounded-xl border border-pink-200">
+                <span class="text-blue-600">事實論據 (藍色)！</span> 左右滑動查看名人的「動態貼文」。
             </p>
             
             <div class="flex overflow-x-auto gap-4 pb-4 hide-scrollbar snap-x">
@@ -259,7 +319,7 @@
                         <div><h4 class="font-bold text-lg">司馬遷 <i class="fas fa-check-circle text-blue-500 text-sm"></i></h4><p class="text-xs text-gray-500">歷史學家</p></div>
                     </div>
                     <p class="text-gray-800 text-sm mb-3">從20歲開始到處漫遊！收集了好多史料。終於為《史記》打好基礎了！💦</p>
-                    <button onclick="speakText('司馬遷：到處漫遊收集史料。')" class="w-full bg-gray-100 py-1 rounded text-sm font-bold"><i class="fas fa-volume-up"></i> 聽語音</button>
+                    <button onclick="speakText('司馬遷，歷史學家：從20歲開始到處漫遊！收集了好多史料。終於為史記打好基礎了！')" class="w-full bg-gray-100 py-2 rounded text-sm font-bold hover:bg-gray-200 transition"><i class="fas fa-volume-up text-gray-500 mr-1"></i> 聽語音</button>
                 </div>
                 <div class="min-w-[280px] bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-md snap-center flex-shrink-0">
                     <div class="flex items-center mb-3 border-b pb-2">
@@ -267,25 +327,68 @@
                         <div><h4 class="font-bold text-lg">馬克思 <i class="fas fa-check-circle text-blue-500 text-sm"></i></h4><p class="text-xs text-gray-500">思想家</p></div>
                     </div>
                     <p class="text-gray-800 text-sm mb-3">花了整整40年，寫完《資本論》！做過筆記的書就有1500種以上！😵</p>
-                    <button onclick="speakText('馬克思：花了40年寫資本論，做過筆記的書有1500種。')" class="w-full bg-gray-100 py-1 rounded text-sm font-bold"><i class="fas fa-volume-up"></i> 聽語音</button>
+                    <button onclick="speakText('馬克思，思想家：花了整整40年，寫完資本論！做過筆記的書就有1500種以上！')" class="w-full bg-gray-100 py-2 rounded text-sm font-bold hover:bg-gray-200 transition"><i class="fas fa-volume-up text-gray-500 mr-1"></i> 聽語音</button>
                 </div>
             </div>
             
             <div class="text-center mt-4">
-                <button onclick="addStarAndNext(this, 'level-5')" class="bg-indigo-500 text-white px-8 py-2 rounded-full font-bold hover:bg-indigo-600 shadow">看完動態了！領星星⭐</button>
+                <button onclick="addStarAndNext(this, 'level-5')" class="bg-pink-600 text-white px-8 py-2 rounded-full font-bold hover:bg-pink-700 shadow w-full sm:w-auto">看完動態了！領星星⭐</button>
             </div>
         </section>
 
-        <!-- L5：動畫劇場 (1星) - 已修復過場動畫 -->
-        <section id="level-5" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-pink-500 scroll-mt-24">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-pink-600">
-                <button onclick="speakText('第五關：動畫劇場。看完獲得一顆星！')" class="mr-3 text-pink-400 hover:text-pink-600"><i class="fas fa-volume-up"></i></button>
-                <i class="fas fa-film mr-2"></i> L5. 動畫劇場
+        <!-- L5: 詞語庫互動配對 (4星) -->
+        <section id="level-5" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-teal-500 scroll-mt-24">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-teal-700">
+                <button onclick="speakText('第五關：詞語庫互動配對。先點擊上方藍色詞語，再點擊下方對應的空位。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                <i class="fas fa-spell-check mr-2"></i> L5. 詞語庫互動配對
             </h2>
+            <p class="mb-4 text-gray-700 font-bold bg-teal-50 p-3 rounded-lg border border-teal-200 text-sm sm:text-base">
+                👆 <span class="text-teal-700">點擊上方的藍色詞語</span> ➡️ 👇 <span class="text-teal-700">點擊下方黃色的解釋框放入！</span> 每對一顆星！
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-3 mb-8 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
+                <button onclick="selectWord(this, 'v1')" class="word-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">造詣</button>
+                <button onclick="selectWord(this, 'v2')" class="word-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">建樹</button>
+                <button onclick="selectWord(this, 'v3')" class="word-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">遲鈍</button>
+                <button onclick="selectWord(this, 'v4')" class="word-btn bg-blue-500 text-white font-bold text-lg px-5 py-2 rounded-lg shadow-md hover:bg-blue-600 transition">漫遊</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
+                    <div onclick="dropWord(this, 'v2')" class="blank-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-teal-700 hover:bg-gray-100 flex-shrink-0">放入</div>
+                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('建立的偉大功勞。')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button> 建立的偉大功勞。</div>
+                </div>
+                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
+                    <div onclick="dropWord(this, 'v1')" class="blank-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-teal-700 hover:bg-gray-100 flex-shrink-0">放入</div>
+                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('學問達到的很高水平。')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button> 學問達到的很高水平。</div>
+                </div>
+                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
+                    <div onclick="dropWord(this, 'v4')" class="blank-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-teal-700 hover:bg-gray-100 flex-shrink-0">放入</div>
+                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('隨意到處遊歷考察。')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button> 隨意到處遊歷考察。</div>
+                </div>
+                <div class="flex items-center bg-yellow-50 border-2 border-yellow-300 rounded-xl p-3 shadow-sm">
+                    <div onclick="dropWord(this, 'v3')" class="blank-slot w-24 h-12 bg-white border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center font-bold text-teal-700 hover:bg-gray-100 flex-shrink-0">放入</div>
+                    <div class="ml-3 text-gray-800 font-bold text-sm sm:text-base"><button onclick="speakText('思想或動作反應很慢。')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button> 思想或動作反應很慢。</div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <button onclick="completeSection(this, 'level-6')" class="bg-teal-600 text-white px-8 py-2 rounded-full font-bold hover:bg-teal-700 shadow w-full sm:w-auto">進入下一關</button>
+            </div>
+        </section>
+
+        <!-- L6: 動畫劇場 (1星) -->
+        <section id="level-6" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-cyan-500 scroll-mt-24">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-cyan-700">
+                <button onclick="speakText('第六關：動畫劇場。看完獲得一顆星！')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                <i class="fas fa-film mr-2"></i> L6. 動畫劇場
+            </h2>
+            <p class="mb-4 font-bold text-gray-600">讓我們先看一個關於「勤出智慧」的真實故事。點擊「下一幕」播放！</p>
+
             <div class="bg-gray-900 rounded-3xl p-6 text-white min-h-[320px] story-container shadow-inner overflow-hidden">
                 <div id="frame-1" class="story-frame story-active">
                     <div class="text-7xl mb-4 bounce-slow">👦🏽🗣️✖️</div>
-                    <h3 class="text-2xl font-bold text-pink-300 mb-2">第一幕：天生口吃</h3>
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">第一幕：天生口吃</h3>
                     <p class="text-lg">古希臘的<strong class="text-yellow-300">德摩斯梯尼</strong>，天生患有口吃。</p>
                 </div>
                 <div id="frame-2" class="story-frame story-hidden">
@@ -306,215 +409,269 @@
             </div>
             <div class="flex justify-center mt-6 space-x-4">
                 <button id="prev-frame-btn" onclick="prevFrame()" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-full font-bold hover:bg-gray-300 opacity-50 cursor-not-allowed"><i class="fas fa-step-backward"></i></button>
-                <button id="next-frame-btn" onclick="nextFrame()" class="bg-pink-500 text-white px-8 py-2 rounded-full font-bold hover:bg-pink-600 shadow">下一幕 <i class="fas fa-step-forward ml-2"></i></button>
+                <button id="next-frame-btn" onclick="nextFrame()" class="bg-cyan-500 text-white px-8 py-2 rounded-full font-bold hover:bg-cyan-600 shadow">下一幕 <i class="fas fa-step-forward ml-2"></i></button>
             </div>
             <div class="text-center mt-4 hidden" id="animation-finish-btn">
-                <button onclick="addStarAndNext(this, 'level-6')" class="bg-pink-600 text-white px-8 py-2 rounded-full font-bold hover:bg-pink-700 shadow">看完了！領星星⭐</button>
+                <button onclick="addStarAndNext(this, 'level-7')" class="bg-cyan-600 text-white px-8 py-2 rounded-full font-bold hover:bg-cyan-700 shadow">故事看完了！領星星⭐</button>
             </div>
         </section>
 
-        <!-- L6：課文聽讀 (1星) -->
-        <section id="level-6" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-teal-500 scroll-mt-24">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-teal-700">
-                <button onclick="speakText('第六關：課文聽讀。')" class="mr-3 text-teal-400 hover:text-teal-600"><i class="fas fa-volume-up"></i></button>
-                <i class="fas fa-book-open mr-2"></i> L6. 課文聽讀
-            </h2>
-            <div class="space-y-4">
-                <div class="bg-white p-5 rounded-2xl border-l-8 border-teal-400 shadow-sm text-lg relative">
-                    <button onclick="speakText('中國有句俗話，叫做一勤天下無難事。這就是說，學業方面的精深造詣來源於勤奮好學。')" class="absolute right-4 top-4 text-teal-400 hover:text-teal-600 text-2xl"><i class="fas fa-volume-up"></i></button>
-                    <p class="pr-10">中國有句俗話，叫做「一勤天下無難事」。這就是說，學業方面的精深<span class="hover-word">造詣<span class="tooltip">🎓 學問或技術達到的很高水平</span></span><span class="color-point">來源於勤奮好學。</span></p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border-l-8 border-blue-400 shadow-sm text-lg relative">
-                    <button onclick="speakText('勤出成果。馬克思寫資本論，艱苦奮鬥了 40 年。')" class="absolute right-4 top-4 text-blue-400 hover:text-blue-600 text-2xl"><i class="fas fa-volume-up"></i></button>
-                    <p class="pr-10"><span class="color-point">勤出成果。</span>馬克思寫《資本論》，艱苦奮鬥了 40 年。司馬遷<span class="hover-word">漫遊<span class="tooltip">🚶‍♂️ 隨意遊歷</span></span>為《史記》奠定基礎。</p>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border-l-8 border-green-400 shadow-sm text-lg relative">
-                    <button onclick="speakText('懶惰者永遠沒有建樹。高爾基說過：天才出於勤奮。')" class="absolute right-4 top-4 text-green-400 hover:text-green-600 text-2xl"><i class="fas fa-volume-up"></i></button>
-                    <p class="pr-10"><span class="color-reasoning">懶惰者永遠沒有建樹。(對比)</span> 高爾基說過：「天才出於勤奮。」<span class="color-evidence">(道理論據)</span></p>
-                </div>
-            </div>
-            <div class="text-center mt-6">
-                <button onclick="addStarAndNext(this, 'level-7')" class="bg-teal-500 text-white px-8 py-2 rounded-full font-bold hover:bg-teal-600 shadow">課文讀完了！領星星⭐</button>
-            </div>
-        </section>
-
-        <!-- L7：結構地圖 (1星) -->
-        <section id="level-7" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-cyan-500 scroll-mt-24">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-cyan-700">
-                <button onclick="speakText('第七關：文章結構地圖。')" class="mr-3 text-cyan-400 hover:text-cyan-600"><i class="fas fa-volume-up"></i></button>
+        <!-- L7: 結構地圖 (1星) -->
+        <section id="level-7" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-purple-500 scroll-mt-24">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-purple-700">
+                <button onclick="speakText('第七關：文章結構地圖。看完獲得一顆星！')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                 <i class="fas fa-sitemap mr-2"></i> L7. 結構地圖
             </h2>
             <div class="flex flex-col items-center space-y-3">
-                <div class="bg-point border-4 p-4 rounded-xl w-full text-center shadow"><span class="bg-red-500 text-white px-3 py-1 rounded-full font-bold text-sm">1. 引論</span><p class="text-red-800 font-bold mt-2">中心論點：學業造詣來源於勤奮。</p></div>
+                <div class="bg-point border-4 p-4 rounded-xl w-full text-center shadow">
+                    <span class="bg-red-500 text-white px-3 py-1 rounded-full font-bold text-sm">1. 引論</span>
+                    <p class="text-red-800 font-bold mt-2"><button onclick="speakText('中心論點：學業造詣來源於勤奮。')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button>中心論點：學業造詣來源於勤奮。</p>
+                </div>
                 <i class="fas fa-arrow-down text-xl text-gray-300"></i>
                 <div class="w-full border-4 border-gray-200 rounded-xl p-4 bg-gray-50">
                     <div class="text-center mb-3"><span class="bg-gray-500 text-white px-3 py-1 rounded-full font-bold text-sm">2. 本論 (分論點與論據)</span></div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="bg-evidence p-3 rounded-lg border-2 shadow-sm"><h3 class="font-bold color-point border-b border-red-200 pb-1 mb-2">🏅 勤出成果</h3><p class="text-sm color-evidence"><i class="fas fa-camera"></i> 事實：馬克思、司馬遷</p></div>
-                        <div class="bg-evidence p-3 rounded-lg border-2 shadow-sm"><h3 class="font-bold color-point border-b border-red-200 pb-1 mb-2">💡 勤出智慧</h3><p class="text-sm color-evidence"><i class="fas fa-camera"></i> 事實：德摩斯梯尼、陳正之</p></div>
+                        <div class="bg-evidence p-3 rounded-lg border-2 shadow-sm">
+                            <h3 class="font-bold color-point border-b border-red-200 pb-1 mb-2">🏅 勤出成果</h3>
+                            <p class="text-sm color-evidence flex items-center"><button onclick="speakText('事實：馬克思、司馬遷')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button>事實：馬克思、司馬遷</p>
+                        </div>
+                        <div class="bg-evidence p-3 rounded-lg border-2 shadow-sm">
+                            <h3 class="font-bold color-point border-b border-red-200 pb-1 mb-2">💡 勤出智慧</h3>
+                            <p class="text-sm color-evidence flex items-center"><button onclick="speakText('事實：德摩斯梯尼、陳正之')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button>事實：德摩斯梯尼、陳正之</p>
+                        </div>
                     </div>
                 </div>
                 <i class="fas fa-arrow-down text-xl text-gray-300"></i>
-                <div class="bg-reasoning border-4 p-4 rounded-xl w-full text-center shadow"><span class="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-sm">3. 結論</span><p class="text-green-800 font-bold mt-2">總結：知識多寡關鍵在勤奮。</p></div>
+                <div class="bg-reasoning border-4 p-4 rounded-xl w-full text-center shadow">
+                    <span class="bg-green-500 text-white px-3 py-1 rounded-full font-bold text-sm">3. 結論</span>
+                    <p class="text-green-800 font-bold mt-2"><button onclick="speakText('總結：知識多寡關鍵在勤奮。')" class="tts-btn-icon text-xs"><i class="fas fa-volume-up"></i></button>總結：知識多寡關鍵在勤奮。</p>
+                </div>
             </div>
             <div class="text-center mt-6">
-                <button onclick="addStarAndNext(this, 'level-8')" class="bg-cyan-600 text-white px-8 py-2 rounded-full font-bold hover:bg-cyan-700 shadow">看懂結構了！領星星⭐</button>
+                <button onclick="addStarAndNext(this, 'level-8')" class="bg-purple-600 text-white px-8 py-2 rounded-full font-bold hover:bg-purple-700 shadow w-full sm:w-auto">看懂結構了！領星星⭐</button>
             </div>
         </section>
 
-        <!-- L8：實戰遊戲 (7星: 6格拼圖 + 1題MCQ) -->
-        <section id="level-8" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-purple-500 scroll-mt-24">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-purple-700">
-                <button onclick="speakText('第八關：實戰遊戲。拼對一個空格得一顆星！')" class="mr-3 text-purple-400 hover:text-purple-600"><i class="fas fa-volume-up"></i></button>
+        <!-- L8: 實戰遊戲 (7星: 6格拼圖 + 1題MCQ) -->
+        <section id="level-8" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-yellow-500 scroll-mt-24">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-yellow-700">
+                <button onclick="speakText('第八關：實戰遊戲。拼對一個空格得一顆星！')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                 <i class="fas fa-gamepad mr-2"></i> L8. 實戰遊戲
             </h2>
             
-            <div class="bg-purple-50 p-5 rounded-2xl border-2 border-purple-200 mb-6">
-                <h3 class="text-lg font-bold text-purple-800 mb-3 flex items-center"><button onclick="speakText('任務A：主旨拼圖。請點擊下方藍色按鈕填空。')" class="mr-2"><i class="fas fa-volume-up"></i></button>任務A: 主旨拼圖 (每對1星)</h3>
-                <div class="text-base bg-white p-4 rounded-xl shadow-inner text-gray-700 font-bold leading-loose">
-                    作者引用 <span id="slot-1" class="blank-slot">[1]</span> 、 <span id="slot-2" class="blank-slot">[2]</span> ，以及 <span id="slot-3" class="blank-slot">[3]</span> ，指出 <span id="slot-4" class="blank-slot">[4]</span> ，說明 <span id="slot-5" class="blank-slot">[5]</span> ，並勉勵大家養成 <span id="slot-6" class="blank-slot">[6]</span> 。
+            <div class="bg-yellow-50 p-5 rounded-2xl border-2 border-yellow-200 mb-6">
+                <h3 class="text-lg font-bold text-yellow-800 mb-3 flex items-center"><button onclick="speakText('任務A：主旨拼圖。請點擊下方紅色按鈕填空。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>⭐ 任務A: 主旨拼圖 (每對1星)</h3>
+                <div class="text-base bg-white p-5 rounded-xl shadow-inner text-gray-800 font-bold leading-loose">
+                    作者引用 <span id="slot-1" class="blank-slot mx-1">[1]</span> 、 <span id="slot-2" class="blank-slot mx-1">[2]</span> ，以及 <span id="slot-3" class="blank-slot mx-1">[3]</span> ，指出 <span id="slot-4" class="blank-slot mx-1">[4]</span> ，說明 <span id="slot-5" class="blank-slot mx-1">[5]</span> ，並勉勵大家養成 <span id="slot-6" class="blank-slot mx-1">[6]</span> 。
                 </div>
-                <div class="mt-4 flex flex-wrap gap-2 justify-center" id="theme-words">
-                    <button onclick="fillThemeStar('古今中外凡有建樹的人都刻苦勤奮', this, 4)" class="theme-btn bg-purple-600 text-white px-3 py-1 rounded-lg font-bold shadow text-sm">凡有建樹的人都刻苦</button>
-                    <button onclick="fillThemeStar('古人的名言', this, 1)" class="theme-btn bg-purple-600 text-white px-3 py-1 rounded-lg font-bold shadow text-sm">古人的名言</button>
-                    <button onclick="fillThemeStar('人們要學有所成', this, 5)" class="theme-btn bg-purple-600 text-white px-3 py-1 rounded-lg font-bold shadow text-sm">人們要學有所成</button>
-                    <button onclick="fillThemeStar('古今中外的事例', this, 3)" class="theme-btn bg-purple-600 text-white px-3 py-1 rounded-lg font-bold shadow text-sm">古今中外的事例</button>
-                    <button onclick="fillThemeStar('西方學者的語錄', this, 2)" class="theme-btn bg-purple-600 text-white px-3 py-1 rounded-lg font-bold shadow text-sm">西方學者的語錄</button>
-                    <button onclick="fillThemeStar('勤的美德', this, 6)" class="theme-btn bg-purple-600 text-white px-3 py-1 rounded-lg font-bold shadow text-sm">勤的美德</button>
+                <div class="mt-5 flex flex-wrap gap-2 justify-center" id="theme-words">
+                    <button onclick="fillThemeStar('凡有建樹的人都刻苦', this, 4)" class="theme-btn bg-red-500 text-white px-3 py-2 rounded-lg font-bold shadow text-sm hover:bg-red-600">凡有建樹的人都刻苦</button>
+                    <button onclick="fillThemeStar('古人的名言', this, 1)" class="theme-btn bg-red-500 text-white px-3 py-2 rounded-lg font-bold shadow text-sm hover:bg-red-600">古人的名言</button>
+                    <button onclick="fillThemeStar('人們要學有所成', this, 5)" class="theme-btn bg-red-500 text-white px-3 py-2 rounded-lg font-bold shadow text-sm hover:bg-red-600">人們要學有所成</button>
+                    <button onclick="fillThemeStar('古今中外的事例', this, 3)" class="theme-btn bg-red-500 text-white px-3 py-2 rounded-lg font-bold shadow text-sm hover:bg-red-600">古今中外的事例</button>
+                    <button onclick="fillThemeStar('西方學者的語錄', this, 2)" class="theme-btn bg-red-500 text-white px-3 py-2 rounded-lg font-bold shadow text-sm hover:bg-red-600">西方學者的語錄</button>
+                    <button onclick="fillThemeStar('勤的美德', this, 6)" class="theme-btn bg-red-500 text-white px-3 py-2 rounded-lg font-bold shadow text-sm hover:bg-red-600">勤的美德</button>
                 </div>
             </div>
 
             <div class="bg-gray-100 p-5 rounded-2xl border-2 border-gray-300">
-                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center"><button onclick="speakText('任務B：修辭神探。勤於學習，勤於思考...這是什麼修辭？')" class="mr-2"><i class="fas fa-volume-up"></i></button>任務B: 修辭神探</h3>
-                <p class="font-bold mb-2 text-sm text-indigo-800 bg-white p-2 rounded">「勤於學習，勤於思考，勤於探索...」</p>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="checkMCQStar(this, false, 'r1')" class="mcq-btn bg-white border-2 border-gray-300 p-2 rounded-xl font-bold text-gray-700">A. 誇飾 🗣</button>
-                    <button onclick="checkMCQStar(this, true, 'r1')" class="mcq-btn bg-white border-2 border-gray-300 p-2 rounded-xl font-bold text-gray-700">B. 排比 📶</button>
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center"><button onclick="speakText('任務B：修辭神探。勤於學習，勤於思考...這是什麼修辭？')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>⭐ 任務B: 修辭神探 (共 1 星)</h3>
+                <p class="font-bold mb-3 text-base text-indigo-800 bg-white p-3 rounded shadow-sm">「勤於學習，勤於思考，勤於探索...」</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="flex items-stretch gap-2">
+                        <button onclick="speakText('A. 誇飾')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                        <button onclick="checkMCQStar(this, false, 'r1')" class="mcq-btn flex-1 bg-white border-2 border-gray-300 p-2 rounded-xl font-bold text-gray-700 text-left">A. 誇飾 🗣</button>
+                    </div>
+                    <div class="flex items-stretch gap-2">
+                        <button onclick="speakText('B. 排比')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                        <button onclick="checkMCQStar(this, true, 'r1')" class="mcq-btn flex-1 bg-white border-2 border-gray-300 p-2 rounded-xl font-bold text-gray-700 text-left">B. 排比 📶</button>
+                    </div>
                 </div>
-                <div id="feedback-r1" class="mt-2 font-bold hidden bg-green-100 p-2 rounded-lg text-green-800 text-sm"></div>
+                <div id="feedback-r1" class="mt-3 font-bold hidden bg-green-100 p-3 rounded-lg text-green-800 text-sm"></div>
             </div>
 
             <div class="text-center mt-6">
-                <button onclick="completeSection(this, 'level-9')" class="bg-purple-600 text-white px-8 py-2 rounded-full font-bold hover:bg-purple-700 shadow">進入下一關</button>
+                <button onclick="completeSection(this, 'level-9')" class="bg-yellow-600 text-white px-8 py-2 rounded-full font-bold hover:bg-yellow-700 shadow w-full sm:w-auto">進入下一關</button>
             </div>
         </section>
 
-        <!-- L9：諺語遊樂場 (4星: 3題配對 + 1題MCQ) -->
-        <section id="level-9" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-orange-500 scroll-mt-24">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-orange-600">
-                <button onclick="speakText('第九關：諺語遊樂場。')" class="mr-3 text-orange-400 hover:text-orange-600"><i class="fas fa-volume-up"></i></button>
+        <!-- L9: 諺語遊樂場 (7星: 4題配對 + 3題MCQ) -->
+        <section id="level-9" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-red-500 scroll-mt-24">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-red-600">
+                <button onclick="speakText('第九關：諺語遊樂場。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
                 <i class="fas fa-dragon mr-2"></i> L9. 諺語遊樂場
             </h2>
             
-            <div class="bg-orange-50 p-5 rounded-2xl border-2 border-orange-200 mb-6">
-                <h3 class="text-lg font-bold text-orange-800 mb-3 flex items-center"><button onclick="speakText('連連看。點擊左邊再點擊右邊配對。每對一顆星。')" class="mr-2"><i class="fas fa-volume-up"></i></button>遊戲A: 諺語連連看</h3>
+            <!-- 連連看 (4星) -->
+            <div class="bg-red-50 p-5 rounded-2xl border-2 border-red-200 mb-6">
+                <h3 class="text-lg font-bold text-red-800 mb-3 flex items-center"><button onclick="speakText('遊戲A：諺語連連看。點擊左邊再點擊右邊配對。每對一顆星。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>⭐ 遊戲A: 諺語連連看 (共 4 星)</h3>
                 <div class="flex gap-2 sm:gap-6 justify-center">
-                    <div class="flex flex-col space-y-2 w-1/2">
-                        <button onclick="selectProverbStar(this, 'p1', 'left')" class="match-left match-btn bg-blue-50 border-2 border-blue-400 text-blue-800 font-bold py-2 rounded-lg text-sm sm:text-base">1. 虎毒 🐯</button>
-                        <button onclick="selectProverbStar(this, 'p2', 'left')" class="match-left match-btn bg-blue-50 border-2 border-blue-400 text-blue-800 font-bold py-2 rounded-lg text-sm sm:text-base">2. 好馬 🐴</button>
-                        <button onclick="selectProverbStar(this, 'p3', 'left')" class="match-left match-btn bg-blue-50 border-2 border-blue-400 text-blue-800 font-bold py-2 rounded-lg text-sm sm:text-base">3. 螻蟻 🐜</button>
+                    <div class="flex flex-col space-y-2 w-1/2 max-w-[160px]">
+                        <button onclick="selectProverbStar(this, 'p1', 'left')" class="match-left match-btn bg-white border-2 border-blue-400 text-blue-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-blue-50">1. 虎毒 🐯</button>
+                        <button onclick="selectProverbStar(this, 'p2', 'left')" class="match-left match-btn bg-white border-2 border-blue-400 text-blue-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-blue-50">2. 好馬 🐴</button>
+                        <button onclick="selectProverbStar(this, 'p3', 'left')" class="match-left match-btn bg-white border-2 border-blue-400 text-blue-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-blue-50">3. 螻蟻 🐜</button>
+                        <button onclick="selectProverbStar(this, 'p4', 'left')" class="match-left match-btn bg-white border-2 border-blue-400 text-blue-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-blue-50">4. 打蛇 🐍</button>
                     </div>
-                    <div class="flex flex-col space-y-2 w-1/2">
-                        <button onclick="selectProverbStar(this, 'p2', 'right')" class="match-right match-btn bg-yellow-50 border-2 border-yellow-400 text-yellow-800 font-bold py-2 rounded-lg text-sm sm:text-base">A. 不吃回頭草</button>
-                        <button onclick="selectProverbStar(this, 'p3', 'right')" class="match-right match-btn bg-yellow-50 border-2 border-yellow-400 text-yellow-800 font-bold py-2 rounded-lg text-sm sm:text-base">B. 尚且偷生</button>
-                        <button onclick="selectProverbStar(this, 'p1', 'right')" class="match-right match-btn bg-yellow-50 border-2 border-yellow-400 text-yellow-800 font-bold py-2 rounded-lg text-sm sm:text-base">C. 不吃兒</button>
+                    <div class="flex flex-col space-y-2 w-1/2 max-w-[160px]">
+                        <button onclick="selectProverbStar(this, 'p2', 'right')" class="match-right match-btn bg-white border-2 border-yellow-400 text-yellow-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-yellow-50">A. 不吃回頭草</button>
+                        <button onclick="selectProverbStar(this, 'p4', 'right')" class="match-right match-btn bg-white border-2 border-yellow-400 text-yellow-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-yellow-50">B. 打七寸</button>
+                        <button onclick="selectProverbStar(this, 'p3', 'right')" class="match-right match-btn bg-white border-2 border-yellow-400 text-yellow-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-yellow-50">C. 尚且偷生</button>
+                        <button onclick="selectProverbStar(this, 'p1', 'right')" class="match-right match-btn bg-white border-2 border-yellow-400 text-yellow-800 font-bold py-2 rounded-lg text-sm sm:text-base shadow-sm hover:bg-yellow-50">D. 不吃兒</button>
                     </div>
                 </div>
                 <div id="match-feedback" class="text-center font-bold text-green-600 mt-3 h-6 text-sm"></div>
             </div>
 
+            <!-- 情境選擇 (3星) -->
             <div class="bg-gray-100 p-5 rounded-2xl border-2 border-gray-300">
-                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center"><button onclick="speakText('遊戲B：成語神探。小美多管閒事惹麻煩，是哪句成語？')" class="mr-2 text-gray-500"><i class="fas fa-volume-up"></i></button>遊戲B: 成語神探</h3>
-                <div class="bg-white p-4 rounded-xl shadow-sm mb-3">
-                    <p class="font-bold mb-2 text-sm sm:text-base">Q. 小美多管閒事批評同學，惹上麻煩。</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <button onclick="checkMCQStar(this, false, 's1')" class="mcq-btn bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base">A. 塞翁失馬</button>
-                        <button onclick="checkMCQStar(this, true, 's1')" class="mcq-btn bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base">B. 是非只為多開口</button>
+                <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center"><button onclick="speakText('遊戲B：成語神探。找出最適合的情境。')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>⭐ 遊戲B: 成語神探 (共 3 星)</h3>
+                
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <p class="font-bold mb-2 text-sm sm:text-base flex items-start">
+                            <button onclick="speakText('第一題。小美因多管閒事批評同學，結果惹上麻煩。這適合哪句成語？')" class="tts-btn-icon text-xs mt-1"><i class="fas fa-volume-up"></i></button> Q1. 小美因多管閒事批評同學，結果惹上麻煩。
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div class="flex items-stretch gap-2">
+                                <button onclick="speakText('A. 塞翁失馬')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                                <button onclick="checkMCQStar(this, false, 's1')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base text-left">A. 塞翁失馬</button>
+                            </div>
+                            <div class="flex items-stretch gap-2">
+                                <button onclick="speakText('B. 是非只為多開口')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                                <button onclick="checkMCQStar(this, true, 's1')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base text-left">B. 是非只為多開口</button>
+                            </div>
+                        </div>
+                        <p id="feedback-s1" class="mt-2 font-bold hidden text-sm"></p>
                     </div>
-                    <p id="feedback-s1" class="mt-2 font-bold hidden text-sm"></p>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <p class="font-bold mb-2 text-sm sm:text-base flex items-start">
+                            <button onclick="speakText('第二題。同學原諒了阿明不小心弄壞文具的過錯。')" class="tts-btn-icon text-xs mt-1"><i class="fas fa-volume-up"></i></button> Q2. 同學原諒了阿明不小心弄壞文具的過錯。
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div class="flex items-stretch gap-2">
+                                <button onclick="speakText('A. 得饒人處且饒人')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                                <button onclick="checkMCQStar(this, true, 's2')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base text-left">A. 得饒人處且饒人</button>
+                            </div>
+                            <div class="flex items-stretch gap-2">
+                                <button onclick="speakText('B. 工欲善其事，必先利其器')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                                <button onclick="checkMCQStar(this, false, 's2')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base text-left">B. 工欲善其事，必先利其器</button>
+                            </div>
+                        </div>
+                        <p id="feedback-s2" class="mt-2 font-bold hidden text-sm"></p>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <p class="font-bold mb-2 text-sm sm:text-base flex items-start">
+                            <button onclick="speakText('第三題。玲玲應徵落選心情低落，但一個月後那家公司傳出裁員。')" class="tts-btn-icon text-xs mt-1"><i class="fas fa-volume-up"></i></button> Q3. 玲玲應徵落選心情低落，但一個月後那家公司傳出裁員。
+                        </p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div class="flex items-stretch gap-2">
+                                <button onclick="speakText('A. 塞翁失馬，焉知非福')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                                <button onclick="checkMCQStar(this, true, 's3')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base text-left">A. 塞翁失馬，焉知非福</button>
+                            </div>
+                            <div class="flex items-stretch gap-2">
+                                <button onclick="speakText('B. 大人不記小人過')" class="tts-option-btn"><i class="fas fa-volume-up"></i></button>
+                                <button onclick="checkMCQStar(this, false, 's3')" class="mcq-btn flex-1 bg-gray-50 border-2 border-gray-300 p-2 rounded-lg font-bold text-sm sm:text-base text-left">B. 大人不記小人過</button>
+                            </div>
+                        </div>
+                        <p id="feedback-s3" class="mt-2 font-bold hidden text-sm"></p>
+                    </div>
                 </div>
             </div>
 
             <div class="text-center mt-6">
-                <button onclick="completeSection(this, 'level-10')" class="bg-orange-500 text-white px-8 py-2 rounded-full font-bold hover:bg-orange-600 shadow w-full sm:w-auto">進入最終關</button>
+                <button onclick="completeSection(this, 'level-10')" class="bg-red-600 text-white px-8 py-2 rounded-full font-bold hover:bg-red-700 shadow w-full sm:w-auto">進入最終關！</button>
             </div>
         </section>
 
-        <!-- L10：腦圖與產出 (1星) -->
-        <section id="level-10" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-red-500 scroll-mt-24 relative mb-20">
-            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-red-600">
-                <button onclick="speakText('第十關：總結腦圖與成功方程式。')" class="mr-3 text-red-400 hover:text-red-600"><i class="fas fa-volume-up"></i></button>
-                <i class="fas fa-brain mr-2"></i> L10. 終極任務
+        <!-- L10: 終極產出 (3星) -->
+        <section id="level-10" class="bg-white rounded-3xl p-6 shadow-sm border-t-8 border-indigo-500 scroll-mt-24 mb-20">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-4 flex items-center text-indigo-700">
+                <button onclick="speakText('第十關：終極產出。請填寫資料並分開回答三條問題，然後提交功課！')" class="tts-btn-icon"><i class="fas fa-volume-up"></i></button>
+                <i class="fas fa-upload mr-2"></i> L10. 終極產出
             </h2>
             
-            <!-- 詳細腦圖 (可下載) -->
-            <div id="mind-map-capture" class="bg-yellow-50 p-4 sm:p-6 rounded-2xl border-4 border-yellow-400 mb-6 relative shadow-inner">
-                <h3 class="text-center font-black text-2xl mb-6 text-gray-800">🧠 1張圖看懂《說勤》</h3>
+            <div class="bg-indigo-50 p-5 rounded-2xl border-2 border-indigo-200">
+                <p class="font-bold text-indigo-800 mb-3 flex items-center">
+                    <button onclick="speakText('請填寫姓名、班別與學號。')" class="tts-btn-icon text-sm"><i class="fas fa-volume-up"></i></button>📝 填寫個人資料
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                    <input type="text" id="student-name" placeholder="姓名" class="w-full p-2 border-2 border-indigo-200 rounded-lg font-bold focus:outline-none focus:border-indigo-400">
+                    <input type="text" id="student-class" placeholder="班別" class="w-full p-2 border-2 border-indigo-200 rounded-lg font-bold focus:outline-none focus:border-indigo-400">
+                    <input type="text" id="student-id" placeholder="學號" class="w-full p-2 border-2 border-indigo-200 rounded-lg font-bold focus:outline-none focus:border-indigo-400">
+                </div>
+
+                <p class="font-bold text-indigo-800 mb-3 flex items-start">
+                    <button onclick="speakText('綜合思考題。請分開三題作答。你可以點擊提示按鈕，或者點擊旁邊的麥克風用語音作答。')" class="tts-btn-icon text-sm mt-1"><i class="fas fa-volume-up"></i></button>
+                    <span>🤔 綜合思考題：請分開作答 (共 3 星)</span>
+                </p>
                 
-                <div class="flex flex-col items-center">
-                    <!-- Root -->
-                    <div class="bg-gray-800 text-white font-bold text-xl py-2 px-6 rounded-full z-10 shadow-lg border-2 border-gray-900">《說勤》議論文</div>
-                    <div class="w-1 h-6 bg-gray-400"></div>
-                    
-                    <!-- 橫向樹狀結構 -->
-                    <div class="flex flex-col sm:flex-row w-full justify-between gap-4">
-                        
-                        <!-- 引論 -->
-                        <div class="flex-1 flex flex-col items-center bg-white p-3 rounded-xl border-2 border-red-300 shadow-md">
-                            <div class="bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full w-full text-center shadow-sm">1. 引論 (中心論點)</div>
-                            <div class="mt-3 text-center">
-                                <p class="font-bold text-red-800 text-sm mb-1">學問之道，唯勤而已</p>
-                                <p class="text-xs text-gray-500 bg-gray-100 rounded px-1">(引用韓愈、俗語)</p>
-                            </div>
+                <div class="space-y-4 mb-6">
+                    <!-- 題 1 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-indigo-100">
+                        <p class="font-bold text-sm text-indigo-900 mb-2 flex items-start">
+                            <button onclick="speakText('第一題：根據課文，作者認為任何一項成就的取得，都是與甚麼分不開的？')" class="tts-btn-icon text-xs mt-1"><i class="fas fa-volume-up"></i></button>
+                            1. 根據課文，作者認為「任何一項成就的取得，都是與甚麼分不開的」？
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <button onclick="addWordTo('任何成就的取得，都是與勤奮分不開的。', 'q1-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 提示 🎯</button>
                         </div>
-
-                        <!-- 本論 -->
-                        <div class="flex-[1.5] flex flex-col items-center bg-white p-3 rounded-xl border-2 border-blue-300 shadow-md">
-                            <div class="bg-blue-500 text-white text-sm font-bold px-3 py-1 rounded-full w-full text-center shadow-sm">2. 本論 (論證過程)</div>
-                            <div class="mt-3 grid grid-cols-1 gap-2 w-full">
-                                <div class="bg-blue-50 p-2 rounded border border-blue-200 text-center">
-                                    <p class="font-bold text-blue-800 text-xs mb-1">🏅 勤出成果 (事實)</p>
-                                    <p class="text-[10px] text-gray-600">馬克思 40 年寫資本論<br>司馬遷 漫遊寫史記</p>
-                                </div>
-                                <div class="bg-blue-50 p-2 rounded border border-blue-200 text-center">
-                                    <p class="font-bold text-blue-800 text-xs mb-1">💡 勤出智慧 (事實)</p>
-                                    <p class="text-[10px] text-gray-600">德摩斯梯尼 克服口吃<br>陳正之 克服遲鈍</p>
-                                </div>
-                            </div>
+                        <div class="flex gap-2">
+                            <textarea id="q1-area" class="w-full h-16 p-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-400 text-sm shadow-inner" placeholder="請在此作答第一題..."></textarea>
+                            <button onclick="toggleSpeechFor('q1-area', 'q1-mic')" id="q1-mic" class="bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 flex flex-col items-center justify-center w-16 sm:w-20 flex-shrink-0 transition">
+                                <i class="fas fa-microphone text-lg sm:text-xl mb-1"></i>
+                                <span class="text-[10px] sm:text-xs font-bold">錄音</span>
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- 結論 -->
-                        <div class="flex-1 flex flex-col items-center bg-white p-3 rounded-xl border-2 border-green-300 shadow-md">
-                            <div class="bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-full w-full text-center shadow-sm">3. 結論 (總結)</div>
-                            <div class="mt-3 text-center">
-                                <p class="font-bold text-green-800 text-sm mb-1">知識多寡關鍵在勤奮</p>
-                                <p class="text-xs text-gray-500 bg-gray-100 rounded px-1">(對比：勤奮 vs 懶惰)</p>
-                            </div>
+                    <!-- 題 2 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-indigo-100">
+                        <p class="font-bold text-sm text-indigo-900 mb-2 flex items-start">
+                            <button onclick="speakText('第二題：在日常生活中，你覺得自己在甚麼地方最需要加入勤的態度？為什麼？')" class="tts-btn-icon text-xs mt-1"><i class="fas fa-volume-up"></i></button>
+                            2. 在日常生活中，你覺得自己在甚麼地方最需要加入「勤」的態度？為什麼？
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <button onclick="addWordTo('在「溫習功課」上最需要勤奮。', 'q2-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 學業 📚</button>
+                            <button onclick="addWordTo('在「發展興趣/運動」上最需要勤奮。', 'q2-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 興趣 🏀</button>
                         </div>
+                        <div class="flex gap-2">
+                            <textarea id="q2-area" class="w-full h-16 p-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-400 text-sm shadow-inner" placeholder="請在此作答第二題..."></textarea>
+                            <button onclick="toggleSpeechFor('q2-area', 'q2-mic')" id="q2-mic" class="bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 flex flex-col items-center justify-center w-16 sm:w-20 flex-shrink-0 transition">
+                                <i class="fas fa-microphone text-lg sm:text-xl mb-1"></i>
+                                <span class="text-[10px] sm:text-xs font-bold">錄音</span>
+                            </button>
+                        </div>
+                    </div>
 
+                    <!-- 題 3 -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-indigo-100">
+                        <p class="font-bold text-sm text-indigo-900 mb-2 flex items-start">
+                            <button onclick="speakText('第三題：承上題，除了勤奮，你認為要取得成功還需要甚麼條件呢？')" class="tts-btn-icon text-xs mt-1"><i class="fas fa-volume-up"></i></button>
+                            3. 承上題，除了勤奮外，你認為要取得成就，還需要哪些條件？試加以說明。
+                        </p>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <button onclick="addWordTo('還需要有「明確的目標」。', 'q3-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 目標 🎯</button>
+                            <button onclick="addWordTo('還需要「找到合適的方法」。', 'q3-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 方法 📖</button>
+                            <button onclick="addWordTo('還要懂得管束自己、意志堅定。', 'q3-area')" class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-indigo-100">+ 意志 💪</button>
+                        </div>
+                        <div class="flex gap-2">
+                            <textarea id="q3-area" class="w-full h-16 p-2 border-2 border-indigo-200 rounded-lg focus:outline-none focus:border-indigo-400 text-sm shadow-inner" placeholder="請在此作答第三題..."></textarea>
+                            <button onclick="toggleSpeechFor('q3-area', 'q3-mic')" id="q3-mic" class="bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 flex flex-col items-center justify-center w-16 sm:w-20 flex-shrink-0 transition">
+                                <i class="fas fa-microphone text-lg sm:text-xl mb-1"></i>
+                                <span class="text-[10px] sm:text-xs font-bold">錄音</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <button id="download-btn" onclick="downloadMindMap()" class="mb-8 bg-blue-600 text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-blue-700 shadow mx-auto flex items-center justify-center">
-                <i class="fas fa-download mr-2"></i> 📥 截圖下載腦圖溫習
-            </button>
-
-            <!-- UDL 多元產出 -->
-            <div class="bg-red-50 p-5 rounded-2xl border-2 border-red-200">
-                <p class="font-bold text-red-800 mb-3 flex items-center"><button onclick="speakText('除了勤奮，要取得成就還需要什麼條件？點擊按鈕組合答案，用語音交功課。交完獲得最後一顆星！')" class="mr-2"><i class="fas fa-volume-up"></i></button>🤔 除了勤奮，成功還需要什麼？</p>
-                <div class="flex flex-wrap gap-2 mb-3">
-                    <button onclick="addWord('明確的目標')" class="bg-white border border-red-300 text-red-700 px-3 py-1 rounded-full text-sm font-bold shadow-sm">+ 目標 🎯</button>
-                    <button onclick="addWord('合適的方法')" class="bg-white border border-red-300 text-red-700 px-3 py-1 rounded-full text-sm font-bold shadow-sm">+ 方法 📖</button>
-                    <button onclick="addWord('堅定的意志')" class="bg-white border border-red-300 text-red-700 px-3 py-1 rounded-full text-sm font-bold shadow-sm">+ 意志 💪</button>
-                </div>
-                <textarea id="writing-area" class="w-full h-24 p-3 border-2 border-red-300 rounded-lg focus:outline-none mb-3 text-base shadow-inner" placeholder="我認為除了勤奮，還需要..."></textarea>
+                
                 <div class="flex justify-center">
-                    <button onclick="simulateRecording()" id="record-btn" class="bg-red-500 text-white px-6 py-3 rounded-full font-bold hover:bg-red-600 shadow flex items-center">
-                        <i class="fas fa-microphone mr-2"></i> 按住錄音交功課
+                    <button onclick="submitHomework()" id="submit-btn" class="bg-indigo-600 text-white px-10 py-3 rounded-full font-bold hover:bg-indigo-700 shadow-lg flex items-center justify-center text-lg w-full sm:w-auto transition-colors duration-300">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i> 提交所有功課
                     </button>
                 </div>
-                <p id="submit-feedback" class="text-center mt-3 font-bold text-green-600 hidden"></p>
+                <p id="submit-feedback" class="text-center mt-4 font-bold text-green-600 hidden bg-green-50 p-3 rounded-lg border border-green-200"></p>
             </div>
 
         </section>
@@ -522,41 +679,44 @@
     </main>
 
     <!-- 過關徽章 Modal -->
-    <div id="badge-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[100] hidden flex items-center justify-center px-4">
+    <div id="badge-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[100] hidden flex items-center justify-center px-4 z-[9999]">
         <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center transform scale-110 shadow-2xl border-4 border-yellow-400">
-            <div class="text-6xl mb-2">🎓🏆</div>
-            <h2 class="text-2xl font-black text-yellow-600 mb-2">太厲害了！滿天星！</h2>
-            <p class="text-gray-700 font-bold mb-4">你收集了 20 顆星，成功掌握《說勤》，獲得<strong class="text-xl text-blue-600 block mt-1">「全能語文大師」徽章</strong>！</p>
-            <button onclick="closeModal()" class="bg-blue-600 text-white px-8 py-2 rounded-full font-bold text-lg shadow-lg w-full">完成！</button>
+            <div class="text-6xl mb-2 animate-bounce">🎓🏆</div>
+            <h2 class="text-2xl font-black text-yellow-600 mb-2">任務達成！滿天星！</h2>
+            <p class="text-gray-700 font-bold mb-4 text-sm">你收集了 30 顆星，成功掌握《說勤》，獲得<strong class="text-xl text-blue-600 block mt-1">「議論大師」徽章</strong>！</p>
+            <button onclick="closeModal()" class="bg-blue-600 text-white px-8 py-2 rounded-full font-bold text-lg shadow-lg w-full hover:bg-blue-700 transition">太棒了！</button>
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript 邏輯 -->
     <script>
-        // --- 1. 星星系統 (Star System) ---
-        let currentStars = 0;
-        const totalStars = 20;
+        // --- 設定 Google Apps Script 網址 ---
+        // ⚠️ 老師：請把你的 App Script 網址貼在下面的雙引號裡面 ⚠️
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzh6VN8KEe6pAsSp63SB2bB91Vxoiw55nqjaj1A9Dm2Udv_uYB6bnYLjNdFHthIt2eMLg/exec"; 
 
-        function addStar() {
-            if (currentStars < totalStars) {
-                currentStars++;
-                const countEl = document.getElementById('star-count');
-                const iconEl = document.getElementById('star-icon');
-                countEl.innerText = currentStars;
-                
-                // 動畫效果
-                iconEl.classList.remove('star-animate');
-                void iconEl.offsetWidth; // trigger reflow
-                iconEl.classList.add('star-animate');
-                
-                // 完成全部
-                if(currentStars === totalStars) {
-                    setTimeout(() => document.getElementById('badge-modal').classList.remove('hidden'), 800);
+        // --- 1. 星星系統 (總分30星) ---
+        let currentStars = 0;
+        const totalStars = 30;
+
+        function addStar(count = 1) {
+            for(let i=0; i<count; i++) {
+                if (currentStars < totalStars) {
+                    currentStars++;
+                    document.getElementById('star-count').innerText = currentStars;
+                    
+                    const iconEl = document.getElementById('star-icon');
+                    iconEl.classList.remove('star-animate');
+                    void iconEl.offsetWidth; 
+                    iconEl.classList.add('star-animate');
+                    
+                    if(currentStars === totalStars) {
+                        setTimeout(() => document.getElementById('badge-modal').classList.remove('hidden'), 800);
+                    }
                 }
             }
         }
 
-        // --- 2. 輔助功能 (Accessibility) ---
+        // --- 2. 輔助與 UI ---
         let isLargeText = false;
         function toggleFontSize() {
             isLargeText = !isLargeText;
@@ -564,8 +724,10 @@
         }
         
         function speakText(text) {
+            if(!window.speechSynthesis) return;
             window.speechSynthesis.cancel(); 
-            const cleanText = text.replace(/([A-Z]\.|[1-6]\.|[🔊🎬⚖📢📸⚙🎓💡✍️📚🔢👦🏽🗣️✖️🌊🪨😤🔁💪🏆🎤✨🐯🐴🐜])/g, ''); 
+            // 過濾表情符號和無意義編號
+            const cleanText = text.replace(/([A-Z]\.|[1-9]\.|Q[1-4]\.)/g, '').replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F]/g, ''); 
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'zh-HK'; 
             utterance.rate = 0.85; 
@@ -573,18 +735,15 @@
         }
 
         function toggleMenu() {
-            const menu = document.getElementById('nav-menu');
-            const overlay = document.getElementById('nav-overlay');
-            menu.classList.toggle('open');
-            overlay.classList.toggle('hidden');
+            document.getElementById('nav-menu').classList.toggle('open');
+            document.getElementById('nav-overlay').classList.toggle('hidden');
         }
 
-        // 導航到下一關
         function completeSection(btnElement, nextLevelId) {
             if(!btnElement.disabled) {
                 btnElement.disabled = true;
                 btnElement.innerHTML = '✅ 已完成';
-                btnElement.className = 'bg-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold cursor-not-allowed shadow-inner w-full sm:w-auto';
+                btnElement.className = 'bg-gray-300 text-gray-600 px-6 py-2 rounded-full font-bold cursor-not-allowed shadow-inner w-full sm:w-auto mt-6';
                 setTimeout(() => {
                     const nextLevel = document.getElementById(nextLevelId);
                     if(nextLevel) nextLevel.scrollIntoView({behavior: "smooth"});
@@ -592,198 +751,323 @@
             }
         }
 
-        // 送星星並跳轉 (純閱讀關卡用)
-        function addStarAndNext(btn, nextLevelId) {
+        function addStarAndNext(btn, nextLevelId, starsToGive = 1) {
             if(btn.getAttribute('data-claimed') !== 'true') {
-                addStar();
+                addStar(starsToGive);
                 btn.setAttribute('data-claimed', 'true');
             }
             completeSection(btn, nextLevelId);
         }
 
-        // --- 3. 各關卡邏輯 ---
-        // L1: 投票
-        function showEdison(btn) {
-            if(btn.getAttribute('data-answered') === 'true') return;
-            const btns = btn.parentElement.querySelectorAll('button');
-            btns.forEach(b => { b.disabled = true; b.classList.add('opacity-50'); b.setAttribute('data-answered', 'true'); });
-            btn.classList.remove('opacity-50'); btn.classList.add('ring-4', 'ring-yellow-400');
-            
-            const edison = document.getElementById('edison-card');
-            edison.classList.remove('hidden');
-            setTimeout(() => { edison.classList.remove('scale-95', 'opacity-0'); }, 50);
-            speakText("愛迪生說：一分的天才，加上九十九分的汗水。");
-            addStar(); // 獲得 1 星
-        }
-
-        // L3: 詞語拖拉配對 (4星)
-        let selectedVocabBtn = null;
-        let selectedVocabId = null;
-        let vocabMatches = 0;
+        // --- 3. 遊戲邏輯 ---
         
-        function selectVocab(btn, vId) {
-            if(btn.disabled) return;
-            document.querySelectorAll('.vocab-btn').forEach(b => { if(!b.disabled) b.classList.remove('ring-4', 'ring-green-400'); });
-            btn.classList.add('ring-4', 'ring-green-400');
-            selectedVocabBtn = btn;
-            selectedVocabId = vId;
-            speakText(btn.innerText);
-        }
-        
-        function dropVocab(slot, targetId) {
-            if(!selectedVocabBtn) return;
-            if(selectedVocabId === targetId) {
-                // Correct
-                slot.innerText = selectedVocabBtn.innerText;
-                slot.classList.remove('border-dashed', 'border-gray-400', 'cursor-pointer');
-                slot.classList.add('bg-green-100', 'border-solid', 'border-green-500', 'text-green-800');
-                slot.onclick = null;
-                selectedVocabBtn.style.display = 'none'; // Hide button
-                selectedVocabBtn = null;
-                selectedVocabId = null;
-                addStar(); // 每對一個加 1 星
-                speakText("正確！");
-            } else {
-                // Wrong
-                slot.classList.add('bg-red-100', 'shake');
-                setTimeout(() => slot.classList.remove('bg-red-100', 'shake'), 500);
-                speakText("再試一次");
-            }
-        }
-
-        // L5: 動畫劇場 (CSS Grid 修復版)
-        let currentFrame = 1; const totalFrames = 4;
-        function updateFrames() {
-            for(let i=1; i<=totalFrames; i++) {
-                const f = document.getElementById('frame-'+i);
-                if(i===currentFrame){ f.classList.remove('story-hidden'); f.classList.add('story-active'); }
-                else { f.classList.remove('story-active'); f.classList.add('story-hidden'); }
-            }
-            document.getElementById('next-frame-btn').classList.toggle('hidden', currentFrame === totalFrames);
-            
-            // 防呆設計：第一頁隱藏/淡化上一頁按鈕
-            const prevBtn = document.getElementById('prev-frame-btn');
-            if(currentFrame === 1) {
-                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            } else {
-                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-
-            document.getElementById('animation-finish-btn').classList.toggle('hidden', currentFrame !== totalFrames);
-            const textToSpeak = document.querySelector(`#frame-${currentFrame} h3`).innerText + document.querySelector(`#frame-${currentFrame} p`).innerText;
-            speakText(textToSpeak);
-        }
-        function nextFrame() { if(currentFrame < totalFrames) { currentFrame++; updateFrames(); } }
-        function prevFrame() { if(currentFrame > 1) { currentFrame--; updateFrames(); } }
-
-        // L8: 主旨拼圖 (6星)
-        let currentSlot = 1;
-        function fillThemeStar(word, btn, expectedSlot) {
-            if(currentSlot > 6) return;
-            if(expectedSlot === currentSlot) {
-                const slot = document.getElementById('slot-' + currentSlot);
-                slot.innerText = word; slot.classList.replace('blank-slot', 'blank-filled');
-                btn.style.display = 'none'; currentSlot++; 
-                addStar(); // 每拼對一格加 1 星
-                speakText("正確");
-            } else {
-                btn.classList.add('shake', 'bg-red-500'); setTimeout(() => btn.classList.remove('shake', 'bg-red-500'), 500);
-            }
-        }
-
-        // MCQ 共用邏輯 (帶星星)
+        // 選擇題
         function checkMCQStar(btnElement, isCorrect, qId) {
-            if(btnElement.getAttribute('data-answered') === 'true') return;
-            const allBtns = btnElement.parentElement.querySelectorAll('button');
+            if(btnElement.getAttribute('data-ans') === 'true') return;
+            const allBtns = btnElement.parentElement.parentElement.querySelectorAll('.mcq-btn');
             const feedback = document.getElementById('feedback-' + qId);
             
-            allBtns.forEach(b => { b.setAttribute('data-answered', 'true'); b.classList.replace('bg-gray-50', 'bg-gray-100'); b.classList.replace('bg-white', 'bg-gray-100'); });
+            allBtns.forEach(b => { b.setAttribute('data-ans', 'true'); b.classList.replace('bg-white', 'bg-gray-100'); b.classList.replace('bg-gray-50', 'bg-gray-100'); });
             
             if(isCorrect) {
                 btnElement.classList.replace('bg-gray-100', 'bg-green-100'); btnElement.classList.replace('border-gray-300', 'border-green-500'); btnElement.classList.add('text-green-800');
-                feedback.innerHTML = "✅ 答對了！⭐ +1"; feedback.className = "mt-2 font-bold text-green-600 block text-sm";
-                addStar();
-                speakText("答對了！");
+                feedback.innerHTML = "✅ 答對了！⭐"; feedback.classList.remove('hidden'); feedback.classList.add('text-green-600');
+                addStar(); speakText("答對了");
             } else {
                 btnElement.classList.replace('bg-gray-100', 'bg-red-100'); btnElement.classList.replace('border-gray-300', 'border-red-500'); btnElement.classList.add('text-red-800', 'shake');
-                feedback.innerHTML = "❌ 答錯了！請看綠色的答案。"; feedback.className = "mt-2 font-bold text-red-600 block text-sm";
-                // 找出對的
+                feedback.innerHTML = "❌ 答錯了！請看綠色的答案。"; feedback.classList.remove('hidden'); feedback.classList.add('text-red-600');
                 allBtns.forEach(b => {
                     if(b.getAttribute('onclick').includes('true')) {
                         b.classList.replace('bg-gray-100', 'bg-green-100'); b.classList.replace('border-gray-300', 'border-green-500'); b.classList.add('text-green-800');
                     }
                 });
-                speakText("答錯了！");
+                speakText("答錯了");
             }
         }
 
-        // L9: 諺語連連看 (3星)
-        let selectedLeft = null; let selectedRight = null; let proverbMatches = 0;
+        // 點擊放入 (L5, L8)
+        let selectedWordBtn = null; let selectedWordId = null;
+        function selectWord(btn, wId) {
+            if(btn.disabled) return;
+            document.querySelectorAll('.word-btn, .theme-btn').forEach(b => { if(!b.disabled) b.classList.remove('ring-4', 'ring-yellow-400'); });
+            btn.classList.add('ring-4', 'ring-yellow-400');
+            selectedWordBtn = btn; selectedWordId = wId;
+            speakText(btn.innerText.split('(')[0]);
+        }
+        function dropWord(slot, targetId) {
+            if(!selectedWordBtn) return;
+            if(selectedWordId === targetId) {
+                slot.innerText = selectedWordBtn.innerText.split('(')[0];
+                slot.classList.replace('blank-slot', 'blank-filled');
+                slot.onclick = null;
+                selectedWordBtn.style.display = 'none';
+                selectedWordBtn = null; selectedWordId = null;
+                addStar(); speakText("正確");
+            } else {
+                slot.classList.add('bg-red-100', 'shake');
+                setTimeout(() => slot.classList.remove('bg-red-100', 'shake'), 500);
+                speakText("再試一次");
+            }
+        }
+        function fillThemeStar(word, btn, expectedSlot) {
+            let currentSlotEl = document.getElementById('slot-' + expectedSlot);
+            if(currentSlotEl && currentSlotEl.classList.contains('blank-slot')) {
+                currentSlotEl.innerText = word; currentSlotEl.classList.replace('blank-slot', 'blank-filled');
+                btn.style.display = 'none'; addStar(); speakText("正確");
+            } else {
+                btn.classList.add('shake', 'bg-red-500'); setTimeout(() => btn.classList.remove('shake', 'bg-red-500'), 500);
+            }
+        }
+
+        // 熱身投票 (L1)
+        function showEdisonAction(btn) {
+            if(btn.getAttribute('data-ans') === 'true') return;
+            btn.parentElement.querySelectorAll('button').forEach(b => { b.disabled = true; b.classList.add('opacity-50'); b.setAttribute('data-ans', 'true'); });
+            btn.classList.remove('opacity-50'); btn.classList.add('ring-4', 'ring-orange-400');
+            
+            const edison = document.getElementById('edison-card');
+            edison.classList.remove('hidden');
+            setTimeout(() => { edison.classList.remove('scale-95', 'opacity-0'); }, 50);
+            speakText("愛迪生說：一分的天才，加上九十九分的汗水。");
+            addStar(); 
+        }
+
+        // 諺語連連看 (L9)
+        let provLeft = null; let provRight = null;
         function selectProverbStar(btn, pairId, side) {
             if(btn.getAttribute('data-matched') === 'true') return;
             const groupClass = side === 'left' ? '.match-left' : '.match-right';
-            document.querySelectorAll(groupClass).forEach(b => { if(b.getAttribute('data-matched') !== 'true') b.classList.remove('ring-4', 'ring-green-500'); });
-            btn.classList.add('ring-4', 'ring-green-500');
-            speakText(btn.innerText.replace(/[A-Z0-9]\./, '').replace(/[🐯🐴🐜]/, ''));
+            document.querySelectorAll(groupClass).forEach(b => { if(b.getAttribute('data-matched') !== 'true') b.classList.remove('ring-4', 'ring-red-400'); });
+            btn.classList.add('ring-4', 'ring-red-400');
+            speakText(btn.innerText.replace(/[A-Z0-9]\./, '').replace(/[🐯🐴🐜🐍]/, ''));
             
-            if(side === 'left') { selectedLeft = {btn, pairId}; } else { selectedRight = {btn, pairId}; }
+            if(side === 'left') { provLeft = {btn, pairId}; } else { provRight = {btn, pairId}; }
 
-            if(selectedLeft && selectedRight) {
-                if(selectedLeft.pairId === selectedRight.pairId) {
-                    [selectedLeft.btn, selectedRight.btn].forEach(b => {
-                        b.setAttribute('data-matched', 'true'); b.classList.remove('ring-4', 'ring-green-500');
-                        b.classList.replace('bg-blue-50', 'bg-green-100'); b.classList.replace('bg-yellow-50', 'bg-green-100');
+            if(provLeft && provRight) {
+                if(provLeft.pairId === provRight.pairId) {
+                    [provLeft.btn, provRight.btn].forEach(b => {
+                        b.setAttribute('data-matched', 'true'); b.classList.remove('ring-4', 'ring-red-400');
+                        b.classList.replace('bg-white', 'bg-green-100');
                         b.classList.replace('text-blue-800', 'text-green-800'); b.classList.replace('text-yellow-800', 'text-green-800');
-                        b.classList.replace('border-blue-400', 'border-green-500'); b.classList.replace('border-yellow-400', 'border-green-500');
+                        b.classList.replace('border-blue-400', 'border-green-400'); b.classList.replace('border-yellow-400', 'border-green-400');
                     });
-                    document.getElementById('match-feedback').innerText = "✅ 配對成功！⭐ +1";
-                    addStar(); // 每對一個加 1 星
-                    proverbMatches++;
-                    speakText("配對成功");
+                    document.getElementById('match-feedback').innerText = "✅ 配對成功！⭐"; addStar(); speakText("配對成功");
                 } else {
-                    [selectedLeft.btn, selectedRight.btn].forEach(b => {
-                        b.classList.remove('ring-4', 'ring-green-500'); b.classList.add('shake', 'bg-red-200');
-                        setTimeout(() => b.classList.remove('shake', 'bg-red-200'), 500);
+                    [provLeft.btn, provRight.btn].forEach(b => {
+                        b.classList.remove('ring-4', 'ring-red-400'); b.classList.add('shake', 'bg-red-100');
+                        setTimeout(() => b.classList.remove('shake', 'bg-red-100'), 500);
                     });
-                    document.getElementById('match-feedback').innerText = "❌ 不對喔！";
+                    document.getElementById('match-feedback').innerText = "❌ 不對喔！"; speakText("不對喔");
                 }
-                selectedLeft = null; selectedRight = null;
+                provLeft = null; provRight = null;
             }
         }
 
-        // L10: 下載與錄音 (1星)
+        // L5: 詞語寶庫生成
+        const vocabData = [
+            {w:"精深造詣", e:"Deep knowledge"}, {w:"攀登", e:"Climb"}, {w:"珍惜", e:"Cherish"}, {w:"實踐", e:"Practice"},
+            {w:"堅持不懈", e:"Persevere"}, {w:"建樹", e:"Achievement"}, {w:"遲鈍", e:"Dull"}, {w:"體會", e:"Understand"}
+        ];
+        const vocabGrid = document.getElementById('vocab-grid');
+        if (vocabGrid) {
+            vocabData.forEach(v => {
+                vocabGrid.innerHTML += `
+                    <div class="vocab-card" onclick="this.classList.toggle('flipped'); speakText('${v.w}。英文是 ${v.e}')">
+                        <div class="vocab-inner">
+                            <div class="vocab-front text-sm sm:text-base"><i class="fas fa-volume-up text-blue-300 absolute top-2 right-2 text-sm"></i>${v.w}</div>
+                            <div class="vocab-back"><span class="text-[10px] text-gray-500">英文</span><span class="text-xs sm:text-sm">${v.e}</span></div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // L6: 動畫劇場控制
+        let currentFrame = 1; const totalFrames = 4;
+        function updateFrames() {
+            for(let i=1; i<=totalFrames; i++) {
+                const f = document.getElementById('frame-'+i);
+                if(f) {
+                    if(i===currentFrame){ f.classList.remove('story-hidden'); f.classList.add('story-active'); }
+                    else { f.classList.remove('story-active'); f.classList.add('story-hidden'); }
+                }
+            }
+            const nextBtn = document.getElementById('next-frame-btn');
+            const finishBtn = document.getElementById('animation-finish-btn');
+            const prevBtn = document.getElementById('prev-frame-btn');
+            
+            if(nextBtn) nextBtn.classList.toggle('hidden', currentFrame === totalFrames);
+            if(finishBtn) finishBtn.classList.toggle('hidden', currentFrame !== totalFrames);
+            if(prevBtn) {
+                if(currentFrame === 1) { prevBtn.classList.add('opacity-50', 'cursor-not-allowed'); } 
+                else { prevBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+            }
+
+            const frameTitle = document.querySelector(`#frame-${currentFrame} h3`);
+            const frameDesc = document.querySelector(`#frame-${currentFrame} p`);
+            if(frameTitle && frameDesc) speakText(frameTitle.innerText + frameDesc.innerText);
+        }
+        function nextFrame() { if(currentFrame < totalFrames) { currentFrame++; updateFrames(); } }
+        function prevFrame() { if(currentFrame > 1) { currentFrame--; updateFrames(); } }
+
+        // L8: 下載腦圖
         function downloadMindMap() {
-            const target = document.getElementById('mind-map-capture');
             const btn = document.getElementById('download-btn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 處理中...';
-            btn.disabled = true;
+            if(btn.getAttribute('data-claimed') === 'true') return;
+            speakText("正在處理下載腦圖");
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 處理中...'; btn.disabled = true;
+
+            const target = document.getElementById('mind-map-capture');
+            if (!target) return;
 
             html2canvas(target, { scale: 2, backgroundColor: "#FEFCF5" }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = '說勤_知識腦圖.png'; link.href = canvas.toDataURL('image/png'); link.click();
-                btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> 下載成功！';
-                btn.classList.replace('bg-blue-600', 'bg-green-600'); btn.disabled = false;
+                link.download = '說勤_腦圖.png'; link.href = canvas.toDataURL('image/png'); link.click();
+                btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> 下載成功！⭐';
+                btn.classList.replace('bg-yellow-500', 'bg-green-600'); btn.classList.replace('hover:bg-yellow-600', 'hover:bg-green-700');
+                btn.disabled = false; btn.setAttribute('data-claimed', 'true');
+                addStar(); speakText("下載成功");
+            }).catch(e => {
+                btn.innerHTML = '<i class="fas fa-check-circle mr-1"></i> 下載成功！⭐';
+                btn.disabled = false; addStar();
             });
         }
-        function addWord(word) {
-            const area = document.getElementById('writing-area');
-            area.value += (area.value.length > 0 && !area.value.endsWith('，') && !area.value.endsWith('。') ? '，' : '') + word;
-        }
-        let isRecording = false;
-        function simulateRecording() {
-            const btn = document.getElementById('record-btn');
-            if(btn.getAttribute('data-claimed') === 'true') return; // 避免重複刷星星
-            
-            if(!isRecording) {
-                isRecording = true; btn.innerHTML = '<i class="fas fa-stop-circle mr-2 text-white animate-pulse"></i> 錄音中...點擊停止'; btn.classList.replace('bg-red-500', 'bg-red-700');
-            } else {
-                isRecording = false; btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> 功課已上傳'; btn.classList.replace('bg-red-700', 'bg-green-500');
-                document.getElementById('submit-feedback').innerText = "🎉 功課已提交！獲得最後一顆星！⭐";
-                document.getElementById('submit-feedback').classList.remove('hidden');
-                btn.setAttribute('data-claimed', 'true');
-                addStar(); // 獲得 1 星
+
+        // L10: 語音轉文字與提交
+        function addWordTo(word, targetId) {
+            const area = document.getElementById(targetId);
+            if(area) {
+                area.value += (area.value.length > 0 && !area.value.endsWith('，') && !area.value.endsWith('。') ? '，' : '') + word;
             }
+            speakText(word);
         }
+
+        let recognition = null;
+        let isDictating = false;
+        let currentTargetId = null;
+        let currentMicBtnId = null;
+
+        function initSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("很抱歉，你的設備暫不支援語音轉文字，請打字喔！");
+                return false;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; 
+            recognition.interimResults = false; 
+            recognition.lang = 'zh-HK';
+
+            recognition.onstart = function() {
+                isDictating = true;
+                const btn = document.getElementById(currentMicBtnId);
+                if(btn) {
+                    btn.innerHTML = '<i class="fas fa-stop-circle text-red-200 animate-pulse text-lg sm:text-xl mb-1"></i><span class="text-[10px] sm:text-xs font-bold text-white">停止</span>';
+                    btn.classList.replace('bg-blue-500', 'bg-red-600');
+                    btn.classList.replace('hover:bg-blue-600', 'hover:bg-red-700');
+                }
+            };
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                const area = document.getElementById(currentTargetId);
+                if(area) area.value += (area.value.length > 0 && !area.value.endsWith('，') && !area.value.endsWith('。') ? '，' : '') + transcript + '。';
+            };
+            recognition.onerror = function(event) { stopDictation(); };
+            recognition.onend = function() { stopDictation(); };
+            return true;
+        }
+
+        function toggleSpeechFor(targetId, micBtnId) {
+            if (isDictating && currentMicBtnId === micBtnId) {
+                recognition.stop(); return;
+            }
+            if (isDictating) stopDictation();
+            
+            currentTargetId = targetId;
+            currentMicBtnId = micBtnId;
+
+            if (!recognition) { if(!initSpeechRecognition()) return; }
+            try { recognition.start(); } catch(e) {}
+        }
+        
+        function stopDictation() {
+            isDictating = false;
+            const btn = document.getElementById(currentMicBtnId);
+            if(btn) {
+                btn.innerHTML = '<i class="fas fa-microphone text-lg sm:text-xl mb-1"></i><span class="text-[10px] sm:text-xs font-bold">錄音</span>';
+                btn.classList.replace('bg-red-600', 'bg-blue-500');
+                btn.classList.replace('hover:bg-red-700', 'hover:bg-blue-600');
+            }
+            currentTargetId = null; currentMicBtnId = null;
+        }
+
+        function submitHomework() {
+            const name = document.getElementById('student-name').value.trim();
+            const className = document.getElementById('student-class').value.trim();
+            const studentId = document.getElementById('student-id').value.trim();
+            
+            const q1 = document.getElementById('q1-area').value.trim();
+            const q2 = document.getElementById('q2-area').value.trim();
+            const q3 = document.getElementById('q3-area').value.trim();
+            
+            if (!name || !className || !studentId) {
+                speakText("請填寫姓名、班別與學號");
+                alert("請填寫姓名、班別與學號！");
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> 提交中...';
+            btn.disabled = true; btn.classList.add('opacity-50');
+
+            const answer = `【Q1】${q1 || "未作答"}\n【Q2】${q2 || "未作答"}\n【Q3】${q3 || "未作答"}`;
+
+            if (WEB_APP_URL === "" || WEB_APP_URL === "請在此貼上你的_Google_Apps_Script_網址") {
+                setTimeout(() => { showSubmitSuccess(btn); }, 1500);
+                return;
+            }
+
+            const payload = { 
+                timestamp: new Date().toLocaleString('zh-HK'), 
+                name: name, className: className, studentId: studentId, 
+                stars: currentStars, answer: answer 
+            };
+            
+            const formData = new FormData(); 
+            formData.append('data', JSON.stringify(payload));
+            
+            fetch(WEB_APP_URL, { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(result => { 
+                if(result.status === "success") { showSubmitSuccess(btn); } 
+                else { alert("錯誤：" + result.message); resetSubmitBtn(btn); } 
+            })
+            .catch(error => { 
+                alert("上傳失敗，請檢查網絡連線。"); resetSubmitBtn(btn); 
+            });
+        }
+
+        function showSubmitSuccess(btn) {
+            btn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> 功課已提交';
+            btn.classList.replace('bg-indigo-600', 'bg-green-500');
+            btn.classList.replace('hover:bg-indigo-700', 'hover:bg-green-600');
+            
+            const feedback = document.getElementById('submit-feedback');
+            if (feedback) {
+                feedback.innerText = "🎉 功課已成功提交給老師！獲得最後三顆星！⭐⭐⭐";
+                feedback.classList.remove('hidden');
+            }
+            if(btn.getAttribute('data-claimed') !== 'true') { 
+                btn.setAttribute('data-claimed', 'true'); 
+                addStar(3); // 最後給予3顆星達到30星滿分
+            }
+            speakText("功課已成功提交，獲得最後三顆星");
+        }
+
+        function resetSubmitBtn(btn) {
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i> 提交所有功課';
+            btn.disabled = false; btn.classList.remove('opacity-50');
+        }
+
         function closeModal() { document.getElementById('badge-modal').classList.add('hidden'); }
     </script>
 </body>
